@@ -1,0 +1,293 @@
+import Foundation
+import SwiftUI
+import Combine
+
+@MainActor
+final class AppViewModel: ObservableObject {
+
+    // MARK: - Published Data
+
+    @Published var agents: [AgentConfig]                  = []
+    @Published var agentRuntimes: [String: AgentRuntime]  = [:]
+    @Published var models: [ModelInfo]                    = []
+    @Published var sessions: [SessionInfo]                = []
+    @Published var alerts: [AlertItem]                    = []
+    @Published var skills: [SkillInfo]                    = []
+    @Published var statPoints: [StatPoint]                = []
+
+    @Published var gatewayStatus: GatewayStatus           = .unknown
+    @Published var gatewayPort: Int                       = 18789
+
+    @Published var isUsingMockData: Bool                  = true
+    @Published var configFilePath: String?                = nil
+
+    /// Auto-refresh interval in seconds (0 = off). Setting triggers timer restart.
+    @Published var refreshInterval: Int = 30 {
+        didSet { restartRefreshTimer() }
+    }
+
+    /// Gateway poll interval in seconds.
+    @Published var gatewayPollInterval: Int = 10 {
+        didSet { restartGatewayTimer() }
+    }
+
+    // MARK: - Derived
+
+    var totalTokens: Int     { agentRuntimes.values.reduce(0) { $0 + $1.totalTokens } }
+    var totalSessions: Int   { sessions.count }
+    var totalMessages: Int   { sessions.reduce(0) { $0 + $1.messages } }
+    var activeAlertCount: Int { alerts.filter { $0.status == .active }.count }
+
+    func runtime(for agentId: String) -> AgentRuntime {
+        agentRuntimes[agentId] ?? AgentRuntime(
+            id: agentId, status: .offline, sessionCount: 0, totalTokens: 0, avgResponseMs: 0
+        )
+    }
+
+    func sessions(for agentId: String) -> [SessionInfo] {
+        sessions.filter { $0.agentId == agentId }
+    }
+
+    // MARK: - Load
+
+    private var fileWatcher: FileWatcher?
+    private var refreshTimer: Timer?
+    private var gatewayTimer: Timer?
+    private var cancellables = Set<AnyCancellable>()
+
+    func loadData() {
+        // Request notification permission up-front
+        NotificationService.shared.requestPermission()
+
+        if let config = ConfigService.shared.load() {
+            apply(config: config)
+            configFilePath = ConfigService.shared.resolvedPath()
+            isUsingMockData = false
+            watchConfigFile()
+            // Start real log-based stats collection
+            StatsCollector.shared.start()
+            StatsCollector.shared.$statPoints
+                .receive(on: DispatchQueue.main)
+                .sink { [weak self] points in self?.statPoints = points }
+                .store(in: &cancellables)
+        } else {
+            applyMockData()
+            isUsingMockData = true
+        }
+
+        // Read persisted intervals
+        let savedRefresh  = UserDefaults.standard.integer(forKey: "autoRefreshInterval")
+        let savedGateway  = UserDefaults.standard.integer(forKey: "gatewayPollInterval")
+        refreshInterval       = savedRefresh  > 0 ? savedRefresh  : 30
+        gatewayPollInterval   = savedGateway  > 0 ? savedGateway  : 10
+
+        startGatewayPolling()
+        restartRefreshTimer()
+    }
+
+    func reload() {
+        guard !isUsingMockData, let config = ConfigService.shared.load() else { return }
+        apply(config: config)
+        checkAlertRules()
+    }
+
+    // MARK: - Refresh Timer
+
+    func restartRefreshTimer() {
+        refreshTimer?.invalidate()
+        refreshTimer = nil
+        guard refreshInterval > 0 else { return }
+        refreshTimer = Timer.scheduledTimer(withTimeInterval: TimeInterval(refreshInterval),
+                                            repeats: true) { [weak self] _ in
+            Task { @MainActor [weak self] in self?.reload() }
+        }
+        // Persist
+        UserDefaults.standard.set(refreshInterval, forKey: "autoRefreshInterval")
+    }
+
+    // MARK: - Gateway Polling
+
+    func startGatewayPolling() {
+        restartGatewayTimer()
+    }
+
+    func stopGatewayPolling() {
+        gatewayTimer?.invalidate()
+        gatewayTimer = nil
+    }
+
+    func restartGatewayTimer() {
+        gatewayTimer?.invalidate()
+        gatewayTimer = nil
+        let interval = max(5, gatewayPollInterval)
+        gatewayTimer = Timer.scheduledTimer(withTimeInterval: TimeInterval(interval),
+                                            repeats: true) { [weak self] _ in
+            Task { @MainActor [weak self] in self?.pollGateway() }
+        }
+        UserDefaults.standard.set(gatewayPollInterval, forKey: "gatewayPollInterval")
+        pollGateway()
+    }
+
+    private func pollGateway() {
+        if isUsingMockData {
+            withAnimation { gatewayStatus = .healthy }
+            return
+        }
+        let urlString = "http://localhost:\(gatewayPort)/api/health"
+        guard let url = URL(string: urlString) else { return }
+        var req = URLRequest(url: url, timeoutInterval: 5)
+        req.httpMethod = "GET"
+        let prevStatus = gatewayStatus
+        URLSession.shared.dataTask(with: req) { [weak self] _, response, _ in
+            Task { @MainActor [weak self] in
+                guard let self else { return }
+                let ok = (response as? HTTPURLResponse)?.statusCode == 200
+                let newStatus: GatewayStatus = ok ? .healthy : .unhealthy
+                withAnimation { self.gatewayStatus = newStatus }
+                // Fire alert if newly unhealthy
+                if prevStatus != .unhealthy && newStatus == .unhealthy {
+                    self.fireGatewayAlert()
+                }
+                // Resolve gateway alert if recovered
+                if prevStatus == .unhealthy && newStatus == .healthy {
+                    self.resolveGatewayAlerts()
+                }
+                self.checkAlertRules()
+            }
+        }.resume()
+    }
+
+    // MARK: - Alert Rules (§3.8.2)
+
+    private let agentOfflineThresholdKey = "agentOfflineThreshold"  // minutes
+    private let tokenAlertPercentKey     = "tokenAlertPercent"       // %
+
+    func checkAlertRules() {
+        guard !isUsingMockData else { return }
+
+        let offlineMinutes = UserDefaults.standard.integer(forKey: agentOfflineThresholdKey)
+        let thresholdMin   = offlineMinutes > 0 ? offlineMinutes : 30
+
+        // Rule 1: Agent offline > threshold
+        for agent in agents {
+            let rt = runtime(for: agent.id)
+            guard rt.status == .offline else { continue }
+            let key = "agent_offline_\(agent.id)"
+            guard !hasActiveAlert(key: key) else { continue }
+            fireAlert(AlertItem(
+                type: .error,
+                message: "\(agent.displayEmoji) \(agent.name) 已离线超过 \(thresholdMin) 分钟"
+            ), dedupeKey: key)
+        }
+
+        // Rule 2: Gateway disconnected — handled in pollGateway()
+
+        // Rule 3: Token anomaly (simple check vs daily average)
+        checkTokenAnomaly()
+    }
+
+    private func checkTokenAnomaly() {
+        guard statPoints.count >= 2 else { return }
+        let recent = statPoints.last!
+        let prevTokens = statPoints.dropLast().map(\.tokens)
+        let avg = prevTokens.reduce(0, +) / prevTokens.count
+        let pct = UserDefaults.standard.integer(forKey: tokenAlertPercentKey)
+        let threshold = pct > 0 ? pct : 150
+        guard avg > 0, recent.tokens > avg * threshold / 100 else { return }
+        let key = "token_anomaly_\(Calendar.current.startOfDay(for: recent.date))"
+        guard !hasActiveAlert(key: key) else { return }
+        let increase = recent.tokens * 100 / avg - 100
+        fireAlert(AlertItem(
+            type: .info,
+            message: "今日 Token 消耗较日均值增加 \(increase)%（\(recent.tokensK.formatted(.number.precision(.fractionLength(1))))k vs avg）"
+        ), dedupeKey: key)
+    }
+
+    private func fireGatewayAlert() {
+        let key = "gateway_down"
+        guard !hasActiveAlert(key: key) else { return }
+        fireAlert(AlertItem(type: .error, message: "Gateway 连接中断 (Port \(gatewayPort))"),
+                  dedupeKey: key)
+    }
+
+    private func resolveGatewayAlerts() {
+        for i in alerts.indices where alerts[i].message.contains("Gateway") && alerts[i].status == .active {
+            alerts[i].status = .resolved
+        }
+        updateBadge()
+    }
+
+    private func fireAlert(_ alert: AlertItem, dedupeKey: String) {
+        alerts.insert(alert, at: 0)
+        NotificationService.shared.send(alert: alert)
+        updateBadge()
+        // Store key so we don't double-fire
+        UserDefaults.standard.set(true, forKey: "alert_active_\(dedupeKey)")
+    }
+
+    private func hasActiveAlert(key: String) -> Bool {
+        UserDefaults.standard.bool(forKey: "alert_active_\(key)")
+        || alerts.contains { $0.status == .active && $0.message.contains(key.split(separator: "_").last.map(String.init) ?? "") }
+    }
+
+    private func updateBadge() {
+        NotificationService.shared.updateBadge(count: activeAlertCount)
+    }
+
+    /// Mock connectivity test — always succeeds after 1.5 s.
+    func simulateConnectivityTest() async -> Bool {
+        try? await Task.sleep(for: .seconds(1.5))
+        return true
+    }
+
+    // MARK: - Private helpers
+
+    private func apply(config: OpenClawConfig) {
+        agents      = config.agents
+        models      = config.allModels
+        gatewayPort = config.port
+    }
+
+    private func applyMockData() {
+        agents        = MockData.agents
+        models        = MockData.models
+        sessions      = MockData.sessions
+        alerts        = MockData.alerts
+        skills        = MockData.skills
+        statPoints    = MockData.statPoints
+        gatewayPort   = 18789
+        agentRuntimes = Dictionary(uniqueKeysWithValues: MockData.agentRuntimes.map { ($0.id, $0) })
+    }
+
+    private func watchConfigFile() {
+        guard let path = configFilePath else { return }
+        fileWatcher = FileWatcher { [weak self] in
+            Task { @MainActor [weak self] in self?.reload() }
+        }
+        fileWatcher?.start(watching: path)
+    }
+}
+
+// MARK: - GatewayStatus
+
+extension AppViewModel {
+    enum GatewayStatus: Equatable {
+        case healthy, unhealthy, unknown
+
+        var dotStatus: StatusDot.Status {
+            switch self {
+            case .healthy:   return .online
+            case .unhealthy: return .offline
+            case .unknown:   return .idle
+            }
+        }
+
+        var label: String {
+            switch self {
+            case .healthy:   return "Healthy"
+            case .unhealthy: return "Offline"
+            case .unknown:   return "Unknown"
+            }
+        }
+    }
+}

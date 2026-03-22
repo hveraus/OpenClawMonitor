@@ -1,0 +1,508 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 56;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		00AB78227D36D66B5DFD0DFB /* StatisticsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3CEE1DBB26C4859C960F2F51 /* StatisticsView.swift */; };
+		19B7F058B0AD4428ECF3258F /* AppViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0DC00BE29EB0942F84849119 /* AppViewModel.swift */; };
+		1EDCCD61572F693C4E81D0F5 /* ModelsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A7A0B77A53CE06FF751F597 /* ModelsView.swift */; };
+		1F82FB3F853A18D94E7D2CDA /* SidebarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F5BE1BC2EA499C65D01BB15 /* SidebarView.swift */; };
+		21493F01598DE84AFBC1EB20 /* ConfigService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B66376F2F965A62CFF439063 /* ConfigService.swift */; };
+		2D79B4494517DC774A7A1110 /* MockData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 81FD6A551115E1BF699C19E3 /* MockData.swift */; };
+		33F90264E9C40ADE9D1CA210 /* AgentCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E4EE6321BC8F5BCF8D2DFAB /* AgentCard.swift */; };
+		3902F1F259335784F3332901 /* StatPoint.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3B359FE16CD5A4248BB0878 /* StatPoint.swift */; };
+		4588B3771FFEBBA05737024E /* SessionInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50DECFDFB3285A79EA913523 /* SessionInfo.swift */; };
+		58A390D08D20D4CAC9D02685 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = CF8FE0E1E3344E9C092BF9D0 /* AppDelegate.swift */; };
+		5AC7D1A1899628BBB20FE0C6 /* OpenClawMonitorApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32014356786E62655045DB5C /* OpenClawMonitorApp.swift */; };
+		5C8D7D19E5C47F75DCAFA5F6 /* SkillsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A8A4B40798333347FB4BC33 /* SkillsView.swift */; };
+		62BB708F38BA91B62A05B5B4 /* NotificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D647ABCAE182179D23DE687 /* NotificationService.swift */; };
+		20A642D8240D653D78DA68B5 /* StatsCollector.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0478EB16418654F7101FAB31 /* StatsCollector.swift */; };
+		67E7363C8B429C69024CF794 /* MainWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6EC0BB35D21AA6D13F40A1B2 /* MainWindow.swift */; };
+		707586F79B552A1B77F0A5EC /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 0A059D94BDD7E13A777D6F80 /* Assets.xcassets */; };
+		7838C2891BF69BB1CAE397EB /* SessionsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 38F495FF6133D909B06E536C /* SessionsView.swift */; };
+		7D97970D8DCB8D51BCFE1505 /* PixelOfficeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9058A8BEEE653B26BADBFE08 /* PixelOfficeView.swift */; };
+		82DFB61FFB8166EEDF985E4A /* PlatformBadge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 099D1235E4BAC170D63D69E6 /* PlatformBadge.swift */; };
+		9350F91597E0CD31D9B1AA76 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36FAD7F8EE2330A1938DF10C /* SettingsView.swift */; };
+		936B39B19CCAD29596617A87 /* AlertItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9429268427969FAA3E99CB28 /* AlertItem.swift */; };
+		97745D121651D66A530FF188 /* SkillInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7FF845DC733107B919DC959 /* SkillInfo.swift */; };
+		A755CC196C038B0A03B1819F /* AlertsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 900DE583A7D95A33116D0D80 /* AlertsView.swift */; };
+		B1F83D91ED6A3AFD4F1A5844 /* MenuBarPopover.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7752DEFEA4755328342C4A83 /* MenuBarPopover.swift */; };
+		B4A7206AC2E63ECC89657A1D /* StatCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27FEDBB90DECB9A88E21260E /* StatCard.swift */; };
+		B4DC1A98E575F5E32EFFA000 /* ConnectivityTestButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8FE0D3C3894A8A304F94E3B /* ConnectivityTestButton.swift */; };
+		BC078C99008541C2E568F60E /* AgentsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2DBBDF989598E19EE6054E4 /* AgentsView.swift */; };
+		DF751E25D70114A20B59975A /* FileWatcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 771B0B4E2D15F1689172D95C /* FileWatcher.swift */; };
+		EC4DA3AEF8442A1AB5D41354 /* OpenClawConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8540544638BD93852F3C78AD /* OpenClawConfig.swift */; };
+		F63392F748A09DD50A572E2F /* StatusDot.swift in Sources */ = {isa = PBXBuildFile; fileRef = A53BC83151C054B062B9F995 /* StatusDot.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		099D1235E4BAC170D63D69E6 /* PlatformBadge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlatformBadge.swift; sourceTree = "<group>"; };
+		0A059D94BDD7E13A777D6F80 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		0A7A0B77A53CE06FF751F597 /* ModelsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelsView.swift; sourceTree = "<group>"; };
+		0DC00BE29EB0942F84849119 /* AppViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppViewModel.swift; sourceTree = "<group>"; };
+		1D647ABCAE182179D23DE687 /* NotificationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationService.swift; sourceTree = "<group>"; };
+		0478EB16418654F7101FAB31 /* StatsCollector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatsCollector.swift; sourceTree = "<group>"; };
+		1E4EE6321BC8F5BCF8D2DFAB /* AgentCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgentCard.swift; sourceTree = "<group>"; };
+		27FEDBB90DECB9A88E21260E /* StatCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatCard.swift; sourceTree = "<group>"; };
+		2A8A4B40798333347FB4BC33 /* SkillsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SkillsView.swift; sourceTree = "<group>"; };
+		32014356786E62655045DB5C /* OpenClawMonitorApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenClawMonitorApp.swift; sourceTree = "<group>"; };
+		36FAD7F8EE2330A1938DF10C /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		38F495FF6133D909B06E536C /* SessionsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionsView.swift; sourceTree = "<group>"; };
+		3C30599040F32DE3156C8381 /* OpenClawMonitor.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = OpenClawMonitor.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		3CEE1DBB26C4859C960F2F51 /* StatisticsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatisticsView.swift; sourceTree = "<group>"; };
+		50DECFDFB3285A79EA913523 /* SessionInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionInfo.swift; sourceTree = "<group>"; };
+		6EC0BB35D21AA6D13F40A1B2 /* MainWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainWindow.swift; sourceTree = "<group>"; };
+		771B0B4E2D15F1689172D95C /* FileWatcher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileWatcher.swift; sourceTree = "<group>"; };
+		7752DEFEA4755328342C4A83 /* MenuBarPopover.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuBarPopover.swift; sourceTree = "<group>"; };
+		81FD6A551115E1BF699C19E3 /* MockData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockData.swift; sourceTree = "<group>"; };
+		8540544638BD93852F3C78AD /* OpenClawConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenClawConfig.swift; sourceTree = "<group>"; };
+		8F5BE1BC2EA499C65D01BB15 /* SidebarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SidebarView.swift; sourceTree = "<group>"; };
+		900DE583A7D95A33116D0D80 /* AlertsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlertsView.swift; sourceTree = "<group>"; };
+		9058A8BEEE653B26BADBFE08 /* PixelOfficeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PixelOfficeView.swift; sourceTree = "<group>"; };
+		9429268427969FAA3E99CB28 /* AlertItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlertItem.swift; sourceTree = "<group>"; };
+		A53BC83151C054B062B9F995 /* StatusDot.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatusDot.swift; sourceTree = "<group>"; };
+		B2DBBDF989598E19EE6054E4 /* AgentsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgentsView.swift; sourceTree = "<group>"; };
+		B3B359FE16CD5A4248BB0878 /* StatPoint.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatPoint.swift; sourceTree = "<group>"; };
+		B66376F2F965A62CFF439063 /* ConfigService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfigService.swift; sourceTree = "<group>"; };
+		B8FE0D3C3894A8A304F94E3B /* ConnectivityTestButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectivityTestButton.swift; sourceTree = "<group>"; };
+		C094E3735B9718FF3522421C /* OpenClawMonitor.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = OpenClawMonitor.entitlements; sourceTree = "<group>"; };
+		CF8FE0E1E3344E9C092BF9D0 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		D7FF845DC733107B919DC959 /* SkillInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SkillInfo.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		D855B4D79B7FBDBC7902721D /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		05C5F454202F45B37D8FA2DE /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				8540544638BD93852F3C78AD /* OpenClawConfig.swift */,
+				50DECFDFB3285A79EA913523 /* SessionInfo.swift */,
+				9429268427969FAA3E99CB28 /* AlertItem.swift */,
+				D7FF845DC733107B919DC959 /* SkillInfo.swift */,
+				B3B359FE16CD5A4248BB0878 /* StatPoint.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		119CBFBDE186F35A27B2CDC6 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				3C30599040F32DE3156C8381 /* OpenClawMonitor.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		1984DDFD258306005731D079 /* MenuBar */ = {
+			isa = PBXGroup;
+			children = (
+				7752DEFEA4755328342C4A83 /* MenuBarPopover.swift */,
+			);
+			path = MenuBar;
+			sourceTree = "<group>";
+		};
+		39546A0DB84A82EEB6B1E3F7 = {
+			isa = PBXGroup;
+			children = (
+				9E43494C894CF46F608DDE6E /* OpenClawMonitor */,
+				119CBFBDE186F35A27B2CDC6 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		3C9A0F8ADAF638DE377A9F02 /* Components */ = {
+			isa = PBXGroup;
+			children = (
+				A53BC83151C054B062B9F995 /* StatusDot.swift */,
+				099D1235E4BAC170D63D69E6 /* PlatformBadge.swift */,
+				27FEDBB90DECB9A88E21260E /* StatCard.swift */,
+				1E4EE6321BC8F5BCF8D2DFAB /* AgentCard.swift */,
+				B8FE0D3C3894A8A304F94E3B /* ConnectivityTestButton.swift */,
+			);
+			path = Components;
+			sourceTree = "<group>";
+		};
+		3E71ACF71E592D8D058A993F /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				81FD6A551115E1BF699C19E3 /* MockData.swift */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
+		3FAA6375B671CF971FD0BB7E /* Main */ = {
+			isa = PBXGroup;
+			children = (
+				6EC0BB35D21AA6D13F40A1B2 /* MainWindow.swift */,
+				8F5BE1BC2EA499C65D01BB15 /* SidebarView.swift */,
+			);
+			path = Main;
+			sourceTree = "<group>";
+		};
+		5BE8B58DDD232D598E2EEAC5 /* ViewModels */ = {
+			isa = PBXGroup;
+			children = (
+				0DC00BE29EB0942F84849119 /* AppViewModel.swift */,
+			);
+			path = ViewModels;
+			sourceTree = "<group>";
+		};
+		67C9E97137C19BA3B69AE985 /* Pages */ = {
+			isa = PBXGroup;
+			children = (
+				B2DBBDF989598E19EE6054E4 /* AgentsView.swift */,
+				0A7A0B77A53CE06FF751F597 /* ModelsView.swift */,
+				38F495FF6133D909B06E536C /* SessionsView.swift */,
+				3CEE1DBB26C4859C960F2F51 /* StatisticsView.swift */,
+				2A8A4B40798333347FB4BC33 /* SkillsView.swift */,
+				900DE583A7D95A33116D0D80 /* AlertsView.swift */,
+				9058A8BEEE653B26BADBFE08 /* PixelOfficeView.swift */,
+			);
+			path = Pages;
+			sourceTree = "<group>";
+		};
+		68195CDB8C0C066959220198 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				1984DDFD258306005731D079 /* MenuBar */,
+				3FAA6375B671CF971FD0BB7E /* Main */,
+				67C9E97137C19BA3B69AE985 /* Pages */,
+				3C9A0F8ADAF638DE377A9F02 /* Components */,
+				F8ABBC35BEA0F1697D69F23F /* Settings */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		8B4B3D4C15A35AB08F8FB803 /* App */ = {
+			isa = PBXGroup;
+			children = (
+				32014356786E62655045DB5C /* OpenClawMonitorApp.swift */,
+				CF8FE0E1E3344E9C092BF9D0 /* AppDelegate.swift */,
+			);
+			path = App;
+			sourceTree = "<group>";
+		};
+		9E43494C894CF46F608DDE6E /* OpenClawMonitor */ = {
+			isa = PBXGroup;
+			children = (
+				8B4B3D4C15A35AB08F8FB803 /* App */,
+				05C5F454202F45B37D8FA2DE /* Models */,
+				C732142AB166F3390C47B829 /* Services */,
+				5BE8B58DDD232D598E2EEAC5 /* ViewModels */,
+				68195CDB8C0C066959220198 /* Views */,
+				3E71ACF71E592D8D058A993F /* Resources */,
+				0A059D94BDD7E13A777D6F80 /* Assets.xcassets */,
+				C094E3735B9718FF3522421C /* OpenClawMonitor.entitlements */,
+			);
+			path = OpenClawMonitor;
+			sourceTree = "<group>";
+		};
+		C732142AB166F3390C47B829 /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				B66376F2F965A62CFF439063 /* ConfigService.swift */,
+				771B0B4E2D15F1689172D95C /* FileWatcher.swift */,
+				1D647ABCAE182179D23DE687 /* NotificationService.swift */,
+				0478EB16418654F7101FAB31 /* StatsCollector.swift */,
+			);
+			path = Services;
+			sourceTree = "<group>";
+		};
+		F8ABBC35BEA0F1697D69F23F /* Settings */ = {
+			isa = PBXGroup;
+			children = (
+				36FAD7F8EE2330A1938DF10C /* SettingsView.swift */,
+			);
+			path = Settings;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		5E96D96631548263447249C8 /* OpenClawMonitor */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = DF915B020466FAB81487D334 /* Build configuration list for PBXNativeTarget "OpenClawMonitor" */;
+			buildPhases = (
+				C74739146F110C44E33402A4 /* Sources */,
+				D855B4D79B7FBDBC7902721D /* Frameworks */,
+				6EF1CDBDBFDB3078D8AC836C /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = OpenClawMonitor;
+			productName = OpenClawMonitor;
+			productReference = 3C30599040F32DE3156C8381 /* OpenClawMonitor.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		A4ACA0A7529F0441C7DF07C6 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1500;
+				LastUpgradeCheck = 2630;
+				TargetAttributes = {
+					5E96D96631548263447249C8 = {
+						CreatedOnToolsVersion = 15.0;
+					};
+				};
+			};
+			buildConfigurationList = 18CA71416637DBEA368202CB /* Build configuration list for PBXProject "OpenClawMonitor" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 39546A0DB84A82EEB6B1E3F7;
+			productRefGroup = 119CBFBDE186F35A27B2CDC6 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				5E96D96631548263447249C8 /* OpenClawMonitor */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		6EF1CDBDBFDB3078D8AC836C /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				707586F79B552A1B77F0A5EC /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		C74739146F110C44E33402A4 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				5AC7D1A1899628BBB20FE0C6 /* OpenClawMonitorApp.swift in Sources */,
+				58A390D08D20D4CAC9D02685 /* AppDelegate.swift in Sources */,
+				EC4DA3AEF8442A1AB5D41354 /* OpenClawConfig.swift in Sources */,
+				4588B3771FFEBBA05737024E /* SessionInfo.swift in Sources */,
+				936B39B19CCAD29596617A87 /* AlertItem.swift in Sources */,
+				97745D121651D66A530FF188 /* SkillInfo.swift in Sources */,
+				3902F1F259335784F3332901 /* StatPoint.swift in Sources */,
+				21493F01598DE84AFBC1EB20 /* ConfigService.swift in Sources */,
+				DF751E25D70114A20B59975A /* FileWatcher.swift in Sources */,
+				62BB708F38BA91B62A05B5B4 /* NotificationService.swift in Sources */,
+				20A642D8240D653D78DA68B5 /* StatsCollector.swift in Sources */,
+				2D79B4494517DC774A7A1110 /* MockData.swift in Sources */,
+				19B7F058B0AD4428ECF3258F /* AppViewModel.swift in Sources */,
+				F63392F748A09DD50A572E2F /* StatusDot.swift in Sources */,
+				82DFB61FFB8166EEDF985E4A /* PlatformBadge.swift in Sources */,
+				B4A7206AC2E63ECC89657A1D /* StatCard.swift in Sources */,
+				33F90264E9C40ADE9D1CA210 /* AgentCard.swift in Sources */,
+				B4DC1A98E575F5E32EFFA000 /* ConnectivityTestButton.swift in Sources */,
+				B1F83D91ED6A3AFD4F1A5844 /* MenuBarPopover.swift in Sources */,
+				67E7363C8B429C69024CF794 /* MainWindow.swift in Sources */,
+				1F82FB3F853A18D94E7D2CDA /* SidebarView.swift in Sources */,
+				BC078C99008541C2E568F60E /* AgentsView.swift in Sources */,
+				1EDCCD61572F693C4E81D0F5 /* ModelsView.swift in Sources */,
+				7838C2891BF69BB1CAE397EB /* SessionsView.swift in Sources */,
+				00AB78227D36D66B5DFD0DFB /* StatisticsView.swift in Sources */,
+				5C8D7D19E5C47F75DCAFA5F6 /* SkillsView.swift in Sources */,
+				A755CC196C038B0A03B1819F /* AlertsView.swift in Sources */,
+				7D97970D8DCB8D51BCFE1505 /* PixelOfficeView.swift in Sources */,
+				9350F91597E0CD31D9B1AA76 /* SettingsView.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		1BF8EBA6EECA3E1B27F38914 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEAD_CODE_STRIPPING = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				SDKROOT = macosx;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_COMPILATION_MODE = wholemodule;
+			};
+			name = Release;
+		};
+		6249F0E52C851863AF05E52D /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = OpenClawMonitor/OpenClawMonitor.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				DEAD_CODE_STRIPPING = YES;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_APP_SANDBOX = YES;
+				ENABLE_OUTGOING_NETWORK_CONNECTIONS = YES;
+				ENABLE_PREVIEWS = YES;
+				ENABLE_USER_SELECTED_FILES = readonly;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.developer-tools";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				INFOPLIST_KEY_NSPrincipalClass = NSApplication;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.openclaw.monitor;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		9A342603BAC16B090FD28898 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = OpenClawMonitor/OpenClawMonitor.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				DEAD_CODE_STRIPPING = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_APP_SANDBOX = YES;
+				ENABLE_OUTGOING_NETWORK_CONNECTIONS = YES;
+				ENABLE_PREVIEWS = NO;
+				ENABLE_USER_SELECTED_FILES = readonly;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.developer-tools";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				INFOPLIST_KEY_NSPrincipalClass = NSApplication;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.openclaw.monitor;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+		F6A221D6672856E0AFA2A8A3 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEAD_CODE_STRIPPING = YES;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		18CA71416637DBEA368202CB /* Build configuration list for PBXProject "OpenClawMonitor" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				F6A221D6672856E0AFA2A8A3 /* Debug */,
+				1BF8EBA6EECA3E1B27F38914 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		DF915B020466FAB81487D334 /* Build configuration list for PBXNativeTarget "OpenClawMonitor" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				6249F0E52C851863AF05E52D /* Debug */,
+				9A342603BAC16B090FD28898 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = A4ACA0A7529F0441C7DF07C6 /* Project object */;
+}

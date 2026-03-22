@@ -1,0 +1,32 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(pandoc --track-changes=all OpenClaw-Monitor-macOS-PRD.docx -o /tmp/prd_output.md)",
+      "Bash(python3 /tmp/create_openclaw_project.py)",
+      "Bash(xcodebuild -project OpenClawMonitor.xcodeproj -list)",
+      "Bash(xcodebuild -project OpenClawMonitor.xcodeproj -scheme OpenClawMonitor -configuration Debug build)",
+      "Bash(xcodebuild -project OpenClawMonitor.xcodeproj -scheme OpenClawMonitor -configuration Release CODE_SIGN_IDENTITY=\"-\" CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO -derivedDataPath .build build)",
+      "Bash(cp -R /Users/Ken/Projects/OpenClawMonitor/.build/Build/Products/Release/OpenClawMonitor.app /Users/Ken/Projects/OpenClawMonitor/dist/dmg/)",
+      "Bash(brew install:*)",
+      "Bash(create-dmg --volname \"OpenClaw Monitor\" --volicon \".build/Build/Products/Release/OpenClawMonitor.app/Contents/Resources/AppIcon.icns\" --window-pos 200 120 --window-size 600 400 --icon-size 100 --icon \"OpenClawMonitor.app\" 150 180 --hide-extension \"OpenClawMonitor.app\" --app-drop-link 450 180 \"dist/OpenClawMonitor-1.0.dmg\" \"dist/dmg/\")",
+      "Bash(create-dmg --volname \"OpenClaw Monitor\" --window-pos 200 120 --window-size 600 400 --icon-size 100 --icon \"OpenClawMonitor.app\" 150 180 --hide-extension \"OpenClawMonitor.app\" --app-drop-link 450 180 \"dist/OpenClawMonitor-1.0.dmg\" \"dist/dmg/\")",
+      "Bash(python3 -c \"from PIL import Image, ImageDraw, ImageFilter; print\\(''PIL ok''\\)\")",
+      "Bash(pip3 install:*)",
+      "Bash(python3 -c \"from PIL import Image; print\\(''PIL ok''\\)\")",
+      "Bash(python3 -m venv /tmp/iconvenv)",
+      "Bash(/tmp/iconvenv/bin/pip install:*)",
+      "Bash(python3 -c \"import json,sys; d=json.load\\(sys.stdin\\); print\\(f''''{len\\(d[\"\"images\"\"]\\)} entries''''\\)\")",
+      "Bash(pandoc --track-changes=all \"OpenClaw-Monitor-macOS-PRD.docx\" -o /tmp/prd.md)",
+      "Bash(python3 -c \"import secrets; uid1=secrets.token_hex\\(12\\).upper\\(\\); uid2=secrets.token_hex\\(12\\).upper\\(\\); print\\(f''BUILD_FILE={uid1}''\\); print\\(f''FILE_REF={uid2}''\\)\")",
+      "Bash(sed -i '' 's/    private static func loadCache/    nonisolated private static func loadCache/' /Users/Ken/Projects/OpenClawMonitor/OpenClawMonitor/Services/StatsCollector.swift)",
+      "Bash(sed -i '' 's/    private static func saveCache/    nonisolated private static func saveCache/' /Users/Ken/Projects/OpenClawMonitor/OpenClawMonitor/Services/StatsCollector.swift)",
+      "Bash(sed -i '' 's/    private static func scanLogs/    nonisolated private static func scanLogs/' /Users/Ken/Projects/OpenClawMonitor/OpenClawMonitor/Services/StatsCollector.swift)",
+      "Bash(sed -i '' 's/    private static func parseLog/    nonisolated private static func parseLog/' /Users/Ken/Projects/OpenClawMonitor/OpenClawMonitor/Services/StatsCollector.swift)",
+      "Bash(sed -i '' 's/    private static func makeStatPoints/    nonisolated private static func makeStatPoints/' /Users/Ken/Projects/OpenClawMonitor/OpenClawMonitor/Services/StatsCollector.swift)",
+      "Bash(git init:*)",
+      "Bash(git add:*)",
+      "Bash(/Users/Ken/Projects/OpenClawMonitor/.gitignore:*)",
+      "Bash(git rm:*)"
+    ]
+  }
+}
