@@ -81,7 +81,7 @@ struct AgentCard: View {
     }
 
     private func realTest() async -> Bool {
-        guard let url = URL(string: "http://localhost:18789/api/health") else { return false }
+        guard let url = URL(string: "http://localhost:18789/health") else { return false }
         var req = URLRequest(url: url, timeoutInterval: 5)
         req.httpMethod = "GET"
         return (try? await URLSession.shared.data(for: req))

@@ -27,7 +27,7 @@ struct MainWindow: View {
                 // Gateway status indicator
                 HStack(spacing: 6) {
                     StatusDot(status: viewModel.gatewayStatus.dotStatus, size: 7)
-                    Text("Port \(viewModel.gatewayPort)")
+                    Text("Port \(String(viewModel.gatewayPort))")
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }

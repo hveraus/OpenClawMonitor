@@ -84,7 +84,11 @@ final class AppViewModel: ObservableObject {
         refreshInterval       = savedRefresh  > 0 ? savedRefresh  : 30
         gatewayPollInterval   = savedGateway  > 0 ? savedGateway  : 10
 
-        startGatewayPolling()
+        if !isUsingMockData {
+            connectGateway()
+        } else {
+            startGatewayPolling()
+        }
         restartRefreshTimer()
     }
 
@@ -108,7 +112,94 @@ final class AppViewModel: ObservableObject {
         UserDefaults.standard.set(refreshInterval, forKey: "autoRefreshInterval")
     }
 
-    // MARK: - Gateway Polling
+    // MARK: - Gateway WebSocket
+
+    func connectGateway() {
+        let token = ConfigService.shared.lastLoadedConfig?.gateway.auth?.token
+        let port   = gatewayPort
+        let gw     = GatewayService.shared
+        gw.onConnected = { [weak self] in
+            guard let self else { return }
+            withAnimation { self.gatewayStatus = .healthy }
+            Task { await gw.fetchAgents() }
+            Task { await gw.fetchSessions() }
+        }
+        gw.onDisconnected = { [weak self] in
+            guard let self else { return }
+            withAnimation { self.gatewayStatus = .unhealthy }
+            self.fireGatewayAlert()
+        }
+        gw.onAgentsUpdated = { [weak self] gwAgents in
+            self?.applyGWAgents(gwAgents)
+        }
+        gw.onSessionsUpdated = { [weak self] gwSessions in
+            self?.applyGWSessions(gwSessions)
+        }
+        gw.connect(port: port, token: token)
+    }
+
+    private func applyGWAgents(_ gwAgents: [GWAgent]) {
+        // Merge GW agent info into existing agents list (name / emoji override)
+        for gw in gwAgents {
+            if let idx = agents.firstIndex(where: { $0.id == gw.id }) {
+                if agents[idx].name == nil { agents[idx].name = gw.name }
+            }
+            // Ensure runtime exists
+            if agentRuntimes[gw.id] == nil {
+                agentRuntimes[gw.id] = AgentRuntime(
+                    id: gw.id, status: .idle,
+                    sessionCount: 0, totalTokens: 0, avgResponseMs: 0
+                )
+            }
+        }
+        withAnimation { gatewayStatus = .healthy }
+    }
+
+    private func applyGWSessions(_ gwSessions: [GWSession]) {
+        // Build sessions list from gateway data
+        sessions = gwSessions.map { gw in
+            SessionInfo(
+                id: gw.key,
+                agentId: gw.agentId,
+                type: .dm,
+                platform: gw.platform,
+                userName: nil,
+                channelName: nil,
+                tokens: gw.tokens,
+                messages: gw.messageCount,
+                lastActive: gw.lastActivity,
+                status: gwStatusToSessionStatus(gw.status)
+            )
+        }
+        // Update agent runtimes with aggregated stats
+        var countMap: [String: Int] = [:]
+        var tokenMap: [String: Int] = [:]
+        for s in gwSessions {
+            countMap[s.agentId, default: 0] += 1
+            tokenMap[s.agentId, default: 0] += s.tokens
+        }
+        for (agentId, count) in countMap {
+            if agentRuntimes[agentId] != nil {
+                agentRuntimes[agentId]!.sessionCount = count
+                agentRuntimes[agentId]!.totalTokens  = tokenMap[agentId] ?? 0
+                agentRuntimes[agentId]!.status       = count > 0 ? .online : .idle
+            }
+        }
+        // Mark agents with no sessions as idle
+        for agentId in agentRuntimes.keys where countMap[agentId] == nil {
+            agentRuntimes[agentId]!.status = .idle
+        }
+    }
+
+    private func gwStatusToSessionStatus(_ gwStatus: String) -> SessionStatus {
+        switch gwStatus {
+        case "active", "running": return .active
+        case "idle":              return .idle
+        default:                  return .inactive
+        }
+    }
+
+    // MARK: - Gateway Polling (mock mode only)
 
     func startGatewayPolling() {
         restartGatewayTimer()
@@ -136,15 +227,16 @@ final class AppViewModel: ObservableObject {
             withAnimation { gatewayStatus = .healthy }
             return
         }
-        let urlString = "http://localhost:\(gatewayPort)/api/health"
+        let urlString = "http://localhost:\(gatewayPort)/health"
         guard let url = URL(string: urlString) else { return }
         var req = URLRequest(url: url, timeoutInterval: 5)
         req.httpMethod = "GET"
         let prevStatus = gatewayStatus
-        URLSession.shared.dataTask(with: req) { [weak self] _, response, _ in
+        URLSession.shared.dataTask(with: req) { [weak self] _, response, error in
             Task { @MainActor [weak self] in
                 guard let self else { return }
-                let ok = (response as? HTTPURLResponse)?.statusCode == 200
+                // Any HTTP response = gateway is up; only connection failure = down
+                let ok = error == nil && (response as? HTTPURLResponse) != nil
                 let newStatus: GatewayStatus = ok ? .healthy : .unhealthy
                 withAnimation { self.gatewayStatus = newStatus }
                 // Fire alert if newly unhealthy
@@ -256,6 +348,14 @@ final class AppViewModel: ObservableObject {
         }
         models      = config.allModels
         gatewayPort = config.port
+
+        // Initialise runtimes for any agent not yet tracked (idle, stats unknown)
+        for agent in agents where agentRuntimes[agent.id] == nil {
+            agentRuntimes[agent.id] = AgentRuntime(
+                id: agent.id, status: .idle,
+                sessionCount: 0, totalTokens: 0, avgResponseMs: 0
+            )
+        }
     }
 
     private func applyMockData() {

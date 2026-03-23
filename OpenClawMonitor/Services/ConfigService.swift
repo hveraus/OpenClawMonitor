@@ -14,6 +14,9 @@ final class ConfigService {
     /// Last parse/load error for display in the Demo Mode banner.
     private(set) var lastError: String? = nil
 
+    /// The most recently successfully loaded config (used by AppViewModel to read auth token).
+    private(set) var lastLoadedConfig: OpenClawConfig? = nil
+
     private let decoder: JSONDecoder = {
         let d = JSONDecoder()
         d.keyDecodingStrategy = .convertFromSnakeCase
@@ -30,7 +33,9 @@ final class ConfigService {
             lastError = "未找到配置文件 (~/.openclaw/openclaw.json)"
             return nil
         }
-        return parse(url: url)
+        let config = parse(url: url)
+        lastLoadedConfig = config
+        return config
     }
 
     /// The resolved config file path (for display in Settings → About).
