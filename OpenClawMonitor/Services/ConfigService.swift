@@ -11,6 +11,9 @@ final class ConfigService {
     static let shared = ConfigService()
     private init() {}
 
+    /// Last parse/load error for display in the Demo Mode banner.
+    private(set) var lastError: String? = nil
+
     private let decoder: JSONDecoder = {
         let d = JSONDecoder()
         d.keyDecodingStrategy = .convertFromSnakeCase
@@ -22,7 +25,11 @@ final class ConfigService {
 
     /// Returns the parsed config, or nil if no file was found / parse failed.
     func load() -> OpenClawConfig? {
-        guard let url = configFileURL() else { return nil }
+        lastError = nil
+        guard let url = configFileURL() else {
+            lastError = "未找到配置文件 (~/.openclaw/openclaw.json)"
+            return nil
+        }
         return parse(url: url)
     }
 
@@ -50,9 +57,16 @@ final class ConfigService {
         do {
             let data = try Data(contentsOf: url)
             return try decoder.decode(OpenClawConfig.self, from: data)
+        } catch let DecodingError.keyNotFound(key, ctx) {
+            lastError = "缺少字段 '\(key.stringValue)'：\(ctx.codingPath.map(\.stringValue).joined(separator: "."))"
+        } catch let DecodingError.typeMismatch(type, ctx) {
+            lastError = "字段类型不匹配 (\(type))：\(ctx.codingPath.map(\.stringValue).joined(separator: "."))"
+        } catch let DecodingError.valueNotFound(type, ctx) {
+            lastError = "字段值为空 (\(type))：\(ctx.codingPath.map(\.stringValue).joined(separator: "."))"
         } catch {
-            print("[ConfigService] Parse failed: \(error)")
-            return nil
+            lastError = error.localizedDescription
         }
+        print("[ConfigService] Parse failed: \(lastError ?? "")")
+        return nil
     }
 }

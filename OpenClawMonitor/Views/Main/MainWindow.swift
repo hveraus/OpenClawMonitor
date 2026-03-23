@@ -15,7 +15,7 @@ struct MainWindow: View {
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
 
                 if viewModel.isUsingMockData {
-                    MockDataBanner()
+                    MockDataBanner(error: viewModel.configError)
                         .transition(.move(edge: .bottom).combined(with: .opacity))
                 }
             }
@@ -78,9 +78,11 @@ struct MainWindow: View {
 // MARK: - Demo Mode Banner
 
 private struct MockDataBanner: View {
+    let error: String?
+
     var body: some View {
         HStack(spacing: 10) {
-            Image(systemName: "flask.fill")
+            Image(systemName: error != nil ? "exclamationmark.triangle.fill" : "flask.fill")
                 .font(.callout)
                 .foregroundStyle(.yellow)
                 .symbolRenderingMode(.hierarchical)
@@ -88,9 +90,15 @@ private struct MockDataBanner: View {
                 Text("Demo Mode")
                     .font(.caption).fontWeight(.semibold)
                     .foregroundStyle(.yellow)
-                Text("未检测到 OpenClaw 配置 — 当前显示内置示例数据")
-                    .font(.caption2)
-                    .foregroundStyle(.primary.opacity(0.7))
+                if let error {
+                    Text("解析失败：\(error)")
+                        .font(.caption2)
+                        .foregroundStyle(.primary.opacity(0.7))
+                } else {
+                    Text("未检测到 OpenClaw 配置 — 当前显示内置示例数据")
+                        .font(.caption2)
+                        .foregroundStyle(.primary.opacity(0.7))
+                }
             }
             Spacer()
             Text("~/.openclaw/openclaw.json")

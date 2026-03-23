@@ -148,13 +148,11 @@ enum MockData {
     // MARK: - Synthetic OpenClawConfig (for ConfigService fallback)
 
     static var config: OpenClawConfig {
-        // Build a synthetic config from the mock data above so the rest of the
-        // app can treat mock mode and real mode identically.
-        let providers = Dictionary(grouping: models, by: \.provider).map { name, infos in
-            ProviderConfig(
-                name: name,
+        // Build providers dict keyed by provider slug
+        var providerDict: [String: ProviderConfig] = [:]
+        for (providerSlug, infos) in Dictionary(grouping: models, by: \.provider) {
+            providerDict[providerSlug] = ProviderConfig(
                 baseUrl: nil,
-                apiKey: nil,
                 models: infos.map { m in
                     RawModelConfig(
                         id: m.id, name: m.name,
@@ -167,10 +165,11 @@ enum MockData {
                 }
             )
         }
+        let agentsContainer = AgentsContainer(list: agents, defaults: nil)
         return OpenClawConfig(
-            gateway: GatewayConfig(port: 18789, mode: "local", bind: "loopback", auth: nil),
-            models: ModelsConfig(providers: providers),
-            agents: agents,
+            gateway: GatewayConfig(port: 18789, mode: "local", auth: nil),
+            agents: agentsContainer,
+            models: ModelsConfig(mode: nil, providers: providerDict),
             channels: nil
         )
     }
@@ -178,10 +177,9 @@ enum MockData {
 
 // MARK: - GatewayConfig memberwise init (needed by MockData)
 extension GatewayConfig {
-    init(port: Int, mode: String?, bind: String?, auth: AuthConfig?) {
+    init(port: Int, mode: String?, auth: AuthConfig?) {
         self.port = port
         self.mode = mode
-        self.bind = bind
         self.auth = auth
     }
 }

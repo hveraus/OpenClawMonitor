@@ -20,6 +20,7 @@ final class AppViewModel: ObservableObject {
 
     @Published var isUsingMockData: Bool                  = true
     @Published var configFilePath: String?                = nil
+    @Published var configError: String?                   = nil
 
     /// Auto-refresh interval in seconds (0 = off). Setting triggers timer restart.
     @Published var refreshInterval: Int = 30 {
@@ -63,6 +64,7 @@ final class AppViewModel: ObservableObject {
             apply(config: config)
             configFilePath = ConfigService.shared.resolvedPath()
             isUsingMockData = false
+            configError = nil
             watchConfigFile()
             // Start real log-based stats collection
             StatsCollector.shared.start()
@@ -73,6 +75,7 @@ final class AppViewModel: ObservableObject {
         } else {
             applyMockData()
             isUsingMockData = true
+            configError = ConfigService.shared.lastError
         }
 
         // Read persisted intervals
@@ -243,7 +246,14 @@ final class AppViewModel: ObservableObject {
     // MARK: - Private helpers
 
     private func apply(config: OpenClawConfig) {
-        agents      = config.agents
+        // Enrich each agent with the shared default model if it has no individual model
+        let defaultModel = config.defaultModelId
+        agents = config.agentList.map { agent in
+            guard agent.model == nil, let dm = defaultModel else { return agent }
+            var enriched = agent
+            enriched.model = dm
+            return enriched
+        }
         models      = config.allModels
         gatewayPort = config.port
     }

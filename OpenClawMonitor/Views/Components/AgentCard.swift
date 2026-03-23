@@ -16,7 +16,7 @@ struct AgentCard: View {
                 Text(agent.displayEmoji)
                     .font(.title)
                 VStack(alignment: .leading, spacing: 2) {
-                    Text(agent.name)
+                    Text(agent.displayName)
                         .font(.headline).fontWeight(.semibold)
                     Text(agent.model ?? "未配置模型")
                         .font(.caption).foregroundStyle(.secondary)
