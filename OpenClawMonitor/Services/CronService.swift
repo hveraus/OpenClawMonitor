@@ -55,10 +55,12 @@ final class CronService: ObservableObject {
             return
         }
         let decoder = JSONDecoder()
-        if let list = try? decoder.decode([CronJob].self, from: data) {
+        // Real format: { "version": 1, "jobs": [...] }
+        if let file = try? decoder.decode(CronJobsFile.self, from: data) {
+            jobs = file.jobs
+        // Fallback: raw array
+        } else if let list = try? decoder.decode([CronJob].self, from: data) {
             jobs = list
-        } else if let dict = try? decoder.decode([String: CronJob].self, from: data) {
-            jobs = Array(dict.values).sorted { $0.name < $1.name }
         } else {
             jobs = []
         }
@@ -75,7 +77,7 @@ final class CronService: ObservableObject {
         return lines.compactMap { line in
             guard let lineData = line.data(using: .utf8) else { return nil }
             return try? decoder.decode(CronRun.self, from: lineData)
-        }.sorted { ($0.startedAt ?? 0) > ($1.startedAt ?? 0) }   // newest first
+        }.sorted { (a: CronRun, b: CronRun) in (a.ts ?? 0) > (b.ts ?? 0) }   // newest first
     }
 
     private func resolveRunsURL(for jobId: String) -> URL {

@@ -161,57 +161,60 @@ enum MockData {
 
     static let cronJobs: [CronJob] = {
         let cal = Calendar.current
-        func hoursAgo(_ h: Int) -> Double {
+        func msAgo(_ h: Int) -> Double {
             cal.date(byAdding: .hour, value: -h, to: .now)!.timeIntervalSince1970 * 1000
+        }
+        func msAhead(_ h: Int) -> Double {
+            cal.date(byAdding: .hour, value: h, to: .now)!.timeIntervalSince1970 * 1000
         }
         return [
             CronJob(
                 id: "daily-brief",
                 name: "每日简报",
-                schedule: CronSchedule(type: "cron", expression: "0 9 * * 1-5",
-                                       interval: nil, at: nil, tz: "Asia/Shanghai"),
+                description: "工作日早上9点发送每日简报",
+                schedule: CronSchedule(kind: "cron", expr: "0 9 * * 1-5", every: nil, tz: "Asia/Shanghai"),
                 enabled: true,
-                lastRun: CronLastRun(timestamp: hoursAgo(3), status: "ok", error: nil),
                 sessionTarget: "main",
-                model: nil,
-                delivery: CronDelivery(channel: "feishu", to: "@team-channel"),
-                agentId: "aria"
+                agentId: "aria",
+                delivery: CronDelivery(mode: "announce", channel: "feishu", to: "@team-channel"),
+                state: CronJobState(nextRunAtMs: msAhead(15)),
+                createdAtMs: msAgo(720), updatedAtMs: msAgo(720)
             ),
             CronJob(
                 id: "weekly-report",
                 name: "周报汇总",
-                schedule: CronSchedule(type: "cron", expression: "0 18 * * 5",
-                                       interval: nil, at: nil, tz: "Asia/Shanghai"),
+                description: "每周五下午6点汇总本周数据",
+                schedule: CronSchedule(kind: "cron", expr: "0 18 * * 5", every: nil, tz: "Asia/Shanghai"),
                 enabled: true,
-                lastRun: CronLastRun(timestamp: hoursAgo(168), status: "ok", error: nil),
                 sessionTarget: "isolated",
-                model: "claude-opus-4-5",
-                delivery: CronDelivery(channel: "telegram", to: "@weekly-digest"),
-                agentId: "echo"
+                agentId: "echo",
+                delivery: CronDelivery(mode: "announce", channel: "telegram", to: "@weekly-digest"),
+                state: CronJobState(nextRunAtMs: msAhead(96)),
+                createdAtMs: msAgo(1440), updatedAtMs: msAgo(1440)
             ),
             CronJob(
                 id: "server-check",
                 name: "服务器健康检查",
-                schedule: CronSchedule(type: "every", expression: nil,
-                                       interval: 1_800_000, at: nil, tz: nil),
+                description: "每30分钟检查一次服务器状态",
+                schedule: CronSchedule(kind: "every", expr: nil, every: 1_800_000, tz: nil),
                 enabled: true,
-                lastRun: CronLastRun(timestamp: hoursAgo(0), status: "ok", error: nil),
                 sessionTarget: "isolated",
-                model: nil,
-                delivery: CronDelivery(channel: "discord", to: "#alerts"),
-                agentId: "bolt"
+                agentId: "bolt",
+                delivery: CronDelivery(mode: "announce", channel: "discord", to: "#alerts"),
+                state: CronJobState(nextRunAtMs: msAhead(0)),
+                createdAtMs: msAgo(360), updatedAtMs: msAgo(360)
             ),
             CronJob(
                 id: "one-time-reminder",
                 name: "季度复盘提醒",
-                schedule: CronSchedule(type: "at", expression: nil,
-                                       interval: nil, at: "2026-03-31T10:00:00+08:00", tz: "Asia/Shanghai"),
+                description: "一次性季度复盘提醒",
+                schedule: CronSchedule(kind: "at", expr: "2026-03-31T10:00:00+08:00", every: nil, tz: "Asia/Shanghai"),
                 enabled: false,
-                lastRun: nil,
                 sessionTarget: "main",
-                model: nil,
-                delivery: CronDelivery(channel: "feishu", to: "@me"),
-                agentId: "sage"
+                agentId: "sage",
+                delivery: CronDelivery(mode: "announce", channel: "feishu", to: "@me"),
+                state: nil,
+                createdAtMs: msAgo(48), updatedAtMs: msAgo(48)
             ),
         ]
     }()

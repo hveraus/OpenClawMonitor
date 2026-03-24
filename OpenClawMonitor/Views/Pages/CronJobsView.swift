@@ -42,6 +42,7 @@ struct CronJobsView: View {
                 ForEach(jobs) { job in
                     CronJobRow(
                         job: job,
+                        lastRun: viewModel.isUsingMockData ? nil : cronService.loadRuns(for: job.id).first,
                         isActioning: actionInProgress == job.id,
                         onEnable:  { await toggleJob(job, enable: true) },
                         onDisable: { await toggleJob(job, enable: false) },
@@ -101,6 +102,7 @@ struct CronJobsView: View {
 
 private struct CronJobRow: View {
     let job: CronJob
+    let lastRun: CronRun?
     let isActioning: Bool
     let onEnable:  () async -> Void
     let onDisable: () async -> Void
@@ -150,20 +152,12 @@ private struct CronJobRow: View {
 
                     ScheduleTypeBadge(type: job.scheduleTypeBadge)
 
-                    if let modelOverride = job.model {
-                        Text(modelOverride)
-                            .font(.caption2)
-                            .padding(.horizontal, 7).padding(.vertical, 2)
-                            .background(.purple.opacity(0.15), in: Capsule())
-                            .foregroundStyle(.purple)
-                    }
-
                     Spacer()
 
-                    // Last run result indicator
-                    if let succeeded = job.lastRunSucceeded {
-                        Image(systemName: succeeded ? "checkmark.circle.fill" : "xmark.circle.fill")
-                            .foregroundStyle(succeeded ? .green : .red)
+                    // Last run result from runs JSONL
+                    if let run = lastRun {
+                        Image(systemName: run.succeeded ? "checkmark.circle.fill" : "xmark.circle.fill")
+                            .foregroundStyle(run.succeeded ? .green : .red)
                             .font(.callout)
                     }
                 }
@@ -176,7 +170,7 @@ private struct CronJobRow: View {
                     Text(job.humanReadableSchedule)
                         .font(.subheadline)
                         .foregroundStyle(.primary)
-                    if let expr = job.schedule.expression {
+                    if let expr = job.schedule.expr {
                         Text("(\(expr))")
                             .font(.system(.caption, design: .monospaced))
                             .foregroundStyle(.tertiary)
@@ -192,7 +186,8 @@ private struct CronJobRow: View {
 
                 // Row 3: meta info
                 HStack(spacing: 16) {
-                    if let lastDate = job.lastRunDate {
+                    // Last run time
+                    if let lastDate = lastRun?.finishedDate {
                         Label {
                             Text(lastDate, style: .relative) + Text(" 前")
                         } icon: {
@@ -204,6 +199,17 @@ private struct CronJobRow: View {
                         Label("从未运行", systemImage: "minus.circle")
                             .font(.caption)
                             .foregroundStyle(.tertiary)
+                    }
+
+                    // Next run time
+                    if let nextDate = job.nextRunDate {
+                        Label {
+                            Text(nextDate, style: .relative) + Text(" 后")
+                        } icon: {
+                            Image(systemName: "clock.arrow.circlepath")
+                        }
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
                     }
 
                     Label(sessionTargetDisplay, systemImage: "target")
