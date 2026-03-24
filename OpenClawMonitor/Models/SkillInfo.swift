@@ -5,20 +5,25 @@ struct SkillInfo: Identifiable {
     let name: String
     let description: String
     let type: SkillType
-    var isEnabled: Bool
+    var isEnabled: Bool     // eligible == 1 && disabled == 0
+    var isEligible: Bool    // all requirements met (regardless of disabled)
     let version: String?
     let author: String?
+    let emoji: String?
 
     init(id: String, name: String, description: String,
-         type: SkillType, isEnabled: Bool = true,
-         version: String? = nil, author: String? = nil) {
+         type: SkillType, isEnabled: Bool = true, isEligible: Bool = true,
+         version: String? = nil, author: String? = nil,
+         emoji: String? = nil) {
         self.id = id
         self.name = name
         self.description = description
         self.type = type
         self.isEnabled = isEnabled
+        self.isEligible = isEligible
         self.version = version
         self.author = author
+        self.emoji = emoji
     }
 }
 

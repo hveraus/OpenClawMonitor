@@ -36,6 +36,11 @@
 		BC078C99008541C2E568F60E /* AgentsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2DBBDF989598E19EE6054E4 /* AgentsView.swift */; };
 		DF751E25D70114A20B59975A /* FileWatcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 771B0B4E2D15F1689172D95C /* FileWatcher.swift */; };
 		FBCADD6597D7C70AA0973B21 /* GatewayService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3EFFDBCFE9805EC25D7ACBFD /* GatewayService.swift */; };
+		BEE4BE190D593301B2907B0A /* CronJob.swift in Sources */ = {isa = PBXBuildFile; fileRef = C09048FDAF12DF9C93E9621C /* CronJob.swift */; };
+		D9E9AD7B29E7DE2C6B306636 /* CronService.swift in Sources */ = {isa = PBXBuildFile; fileRef = D07047CE3E36454CFDE2BCD6 /* CronService.swift */; };
+		9A2DA26F0731C23334DD9927 /* CronJobsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3AE169A21011C7B58E9F08F /* CronJobsView.swift */; };
+		E98CCC774E122DE6567EAC79 /* ModelPriceReference.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3CE5605A81B9401B4F0AE725 /* ModelPriceReference.swift */; };
+		986F7210AFD95560D1381651 /* DeviceIdentity.swift in Sources */ = {isa = PBXBuildFile; fileRef = DEEFC77D55373710D7AF6F57 /* DeviceIdentity.swift */; };
 		EC4DA3AEF8442A1AB5D41354 /* OpenClawConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8540544638BD93852F3C78AD /* OpenClawConfig.swift */; };
 		F63392F748A09DD50A572E2F /* StatusDot.swift in Sources */ = {isa = PBXBuildFile; fileRef = A53BC83151C054B062B9F995 /* StatusDot.swift */; };
 /* End PBXBuildFile section */
@@ -59,6 +64,11 @@
 		6EC0BB35D21AA6D13F40A1B2 /* MainWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainWindow.swift; sourceTree = "<group>"; };
 		771B0B4E2D15F1689172D95C /* FileWatcher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileWatcher.swift; sourceTree = "<group>"; };
 		3EFFDBCFE9805EC25D7ACBFD /* GatewayService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GatewayService.swift; sourceTree = "<group>"; };
+		C09048FDAF12DF9C93E9621C /* CronJob.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CronJob.swift; sourceTree = "<group>"; };
+		D07047CE3E36454CFDE2BCD6 /* CronService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CronService.swift; sourceTree = "<group>"; };
+		B3AE169A21011C7B58E9F08F /* CronJobsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CronJobsView.swift; sourceTree = "<group>"; };
+		3CE5605A81B9401B4F0AE725 /* ModelPriceReference.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelPriceReference.swift; sourceTree = "<group>"; };
+		DEEFC77D55373710D7AF6F57 /* DeviceIdentity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceIdentity.swift; sourceTree = "<group>"; };
 		7752DEFEA4755328342C4A83 /* MenuBarPopover.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuBarPopover.swift; sourceTree = "<group>"; };
 		81FD6A551115E1BF699C19E3 /* MockData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockData.swift; sourceTree = "<group>"; };
 		8540544638BD93852F3C78AD /* OpenClawConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenClawConfig.swift; sourceTree = "<group>"; };
@@ -95,6 +105,7 @@
 				9429268427969FAA3E99CB28 /* AlertItem.swift */,
 				D7FF845DC733107B919DC959 /* SkillInfo.swift */,
 				B3B359FE16CD5A4248BB0878 /* StatPoint.swift */,
+				C09048FDAF12DF9C93E9621C /* CronJob.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -169,6 +180,7 @@
 				3CEE1DBB26C4859C960F2F51 /* StatisticsView.swift */,
 				2A8A4B40798333347FB4BC33 /* SkillsView.swift */,
 				900DE583A7D95A33116D0D80 /* AlertsView.swift */,
+				B3AE169A21011C7B58E9F08F /* CronJobsView.swift */,
 				9058A8BEEE653B26BADBFE08 /* PixelOfficeView.swift */,
 			);
 			path = Pages;
@@ -214,10 +226,13 @@
 			isa = PBXGroup;
 			children = (
 				B66376F2F965A62CFF439063 /* ConfigService.swift */,
+				DEEFC77D55373710D7AF6F57 /* DeviceIdentity.swift */,
 				771B0B4E2D15F1689172D95C /* FileWatcher.swift */,
 				3EFFDBCFE9805EC25D7ACBFD /* GatewayService.swift */,
+				3CE5605A81B9401B4F0AE725 /* ModelPriceReference.swift */,
 				1D647ABCAE182179D23DE687 /* NotificationService.swift */,
 				0478EB16418654F7101FAB31 /* StatsCollector.swift */,
+				D07047CE3E36454CFDE2BCD6 /* CronService.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -308,7 +323,9 @@
 				3902F1F259335784F3332901 /* StatPoint.swift in Sources */,
 				21493F01598DE84AFBC1EB20 /* ConfigService.swift in Sources */,
 				DF751E25D70114A20B59975A /* FileWatcher.swift in Sources */,
+				986F7210AFD95560D1381651 /* DeviceIdentity.swift in Sources */,
 				FBCADD6597D7C70AA0973B21 /* GatewayService.swift in Sources */,
+				E98CCC774E122DE6567EAC79 /* ModelPriceReference.swift in Sources */,
 				62BB708F38BA91B62A05B5B4 /* NotificationService.swift in Sources */,
 				20A642D8240D653D78DA68B5 /* StatsCollector.swift in Sources */,
 				2D79B4494517DC774A7A1110 /* MockData.swift in Sources */,
@@ -327,6 +344,9 @@
 				00AB78227D36D66B5DFD0DFB /* StatisticsView.swift in Sources */,
 				5C8D7D19E5C47F75DCAFA5F6 /* SkillsView.swift in Sources */,
 				A755CC196C038B0A03B1819F /* AlertsView.swift in Sources */,
+				BEE4BE190D593301B2907B0A /* CronJob.swift in Sources */,
+				D9E9AD7B29E7DE2C6B306636 /* CronService.swift in Sources */,
+				9A2DA26F0731C23334DD9927 /* CronJobsView.swift in Sources */,
 				7D97970D8DCB8D51BCFE1505 /* PixelOfficeView.swift in Sources */,
 				9350F91597E0CD31D9B1AA76 /* SettingsView.swift in Sources */,
 			);

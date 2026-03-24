@@ -17,9 +17,9 @@ struct AgentsView: View {
                     StatCard(icon: "bubble.left.and.text.bubble.right",
                              value: "\(viewModel.totalSessions)",
                              label: "总会话数")
-                    StatCard(icon: "message",
-                             value: "\(viewModel.totalMessages)",
-                             label: "总消息数")
+                    StatCard(icon: "person.fill.checkmark",
+                             value: "\(viewModel.onlineAgents)",
+                             label: "在线 Agent")
                 }
                 .padding(.horizontal, 20)
 

@@ -34,10 +34,17 @@ struct ModelsView: View {
                     .symbolRenderingMode(.hierarchical)
             }
             .width(44)
-            TableColumn("成本 (输入/输出)", value: \.costFormatted) { m in
-                Text(m.costFormatted)
-                    .font(.system(.caption, design: .monospaced))
-                    .foregroundStyle(.secondary)
+            TableColumn("成本 (输入/输出 / 1M)", value: \.costFormatted) { m in
+                VStack(alignment: .leading, spacing: 1) {
+                    Text(m.costFormatted)
+                        .font(.system(.caption, design: .monospaced))
+                        .foregroundStyle(m.hasZeroCost ? .secondary : .primary)
+                    if !m.costSource.isEmpty && m.hasZeroCost {
+                        Text(m.costSource)
+                            .font(.system(size: 9))
+                            .foregroundStyle(.orange.opacity(0.8))
+                    }
+                }
             }
             TableColumn("测试") { m in
                 ConnectivityTestButton(
@@ -61,7 +68,7 @@ struct ModelsView: View {
         testStates[modelId] = .testing
         let ok = viewModel.isUsingMockData
             ? await viewModel.simulateConnectivityTest()
-            : false
+            : await viewModel.testModelConnectivity(modelId: modelId)
         withAnimation { testStates[modelId] = ok ? .success : .failure }
         try? await Task.sleep(for: .seconds(3))
         withAnimation { testStates[modelId] = .idle }

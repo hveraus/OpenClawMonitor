@@ -43,7 +43,7 @@ struct AgentCard: View {
                 AgentStat(label: "会话数",   value: "\(runtime.sessionCount)")
                 AgentStat(label: "Token",   value: tokenLabel(runtime.totalTokens))
                 AgentStat(label: "平均响应", value: "\(runtime.avgResponseMs) ms")
-                AgentStat(label: "Provider", value: providerName(agent.model))
+                AgentStat(label: "Provider", value: runtime.provider.isEmpty ? providerName(agent.model) : runtime.provider)
             }
 
             // ── Connectivity test ───────────────────────────────────────────

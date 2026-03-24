@@ -78,13 +78,30 @@ private struct SkillCard: View {
     let skill: SkillInfo
     @State private var isHovered = false
 
+    private var statusColor: Color {
+        if skill.isEnabled   { return .green }
+        if !skill.isEligible { return .orange }
+        return Color(.darkGray)
+    }
+
+    private var statusLabel: String {
+        if skill.isEnabled   { return "可用" }
+        if !skill.isEligible { return "缺少依赖" }
+        return "已禁用"
+    }
+
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
             HStack {
-                Image(systemName: skill.type.icon)
-                    .font(.title3)
-                    .symbolRenderingMode(.hierarchical)
-                    .foregroundStyle(.indigo)
+                if let emoji = skill.emoji {
+                    Text(emoji)
+                        .font(.title3)
+                } else {
+                    Image(systemName: skill.type.icon)
+                        .font(.title3)
+                        .symbolRenderingMode(.hierarchical)
+                        .foregroundStyle(.indigo)
+                }
                 Spacer()
                 // Type badge
                 Text(skill.type.rawValue)
@@ -111,18 +128,18 @@ private struct SkillCard: View {
                 }
                 Spacer()
                 Circle()
-                    .fill(skill.isEnabled ? Color.green : Color(.darkGray))
+                    .fill(statusColor)
                     .frame(width: 8, height: 8)
                     .shadow(color: skill.isEnabled ? .green.opacity(0.7) : .clear, radius: 4)
-                Text(skill.isEnabled ? "已启用" : "已禁用")
+                Text(statusLabel)
                     .font(.caption2)
-                    .foregroundStyle(skill.isEnabled ? .green : .secondary)
+                    .foregroundStyle(statusColor)
             }
         }
         .padding(14)
         .frame(height: 140)
         .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 12))
-        .opacity(skill.isEnabled ? 1.0 : 0.5)
+        .opacity(skill.isEnabled ? 1.0 : (skill.isEligible ? 0.5 : 0.7))
         .scaleEffect(isHovered ? 1.02 : 1.0)
         .shadow(color: .black.opacity(isHovered ? 0.15 : 0.05), radius: isHovered ? 12 : 4)
         .animation(.spring(response: 0.3), value: isHovered)
