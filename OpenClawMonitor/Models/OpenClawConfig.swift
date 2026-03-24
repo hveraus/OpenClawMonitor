@@ -191,11 +191,40 @@ struct ModelInfo: Identifiable {
         maxTokens.map { $0 >= 1000 ? "\($0 / 1000)k" : "\($0)" } ?? "—"
     }
 
+    /// True when config has all-zero costs (self-hosted / no billing).
+    var hasZeroCost: Bool {
+        guard let cost else { return true }
+        return (cost.input ?? 0) == 0 && (cost.output ?? 0) == 0
+    }
+
+    /// Format per-1M-token price for display.
+    private func fmtCost(_ perToken: Double?) -> String {
+        guard let v = perToken else { return "?" }
+        let perM = v * 1_000_000
+        if perM == 0 { return "$0" }
+        if perM < 0.10 { return String(format: "$%.4f", perM) }
+        if perM < 1.00 { return String(format: "$%.3f", perM) }
+        return String(format: "$%.2f", perM)
+    }
+
+    /// Configured cost string (per 1M tokens). Falls through to reference price.
     var costFormatted: String {
-        guard let cost else { return "—" }
-        let i = cost.input.map  { String(format: "$%.2f", $0) } ?? "?"
-        let o = cost.output.map { String(format: "$%.2f", $0) } ?? "?"
-        return "\(i) / \(o)"
+        if !hasZeroCost, let cost {
+            return "\(fmtCost(cost.input)) / \(fmtCost(cost.output))"
+        }
+        if let ref = ModelPriceReference.lookup(id) {
+            let i = String(format: "%.2f", ref.input)
+            let o = String(format: "%.2f", ref.output)
+            return "\(ref.unit)\(i) / \(ref.unit)\(o) ※"
+        }
+        return "—"
+    }
+
+    /// Source label for cost column tooltip / legend.
+    var costSource: String {
+        if !hasZeroCost { return "来自配置" }
+        if let ref = ModelPriceReference.lookup(id) { return "参考价 (\(ref.source))" }
+        return ""
     }
 }
 
@@ -207,6 +236,7 @@ struct AgentRuntime: Identifiable {
     var sessionCount: Int
     var totalTokens: Int
     var avgResponseMs: Int
+    var provider: String = ""  // populated from gateway session data
 
     enum AgentStatus: String {
         case online, idle, offline

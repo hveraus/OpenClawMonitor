@@ -56,6 +56,7 @@ struct MainWindow: View {
         case .statistics:  StatisticsView()
         case .skills:      SkillsView()
         case .alerts:      AlertsView()
+        case .cronJobs:    CronJobsView()
         case .pixelOffice: PixelOfficeView()
         case nil:          AgentsView()
         }

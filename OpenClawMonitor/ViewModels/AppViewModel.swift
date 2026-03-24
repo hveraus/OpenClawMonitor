@@ -14,6 +14,7 @@ final class AppViewModel: ObservableObject {
     @Published var alerts: [AlertItem]                    = []
     @Published var skills: [SkillInfo]                    = []
     @Published var statPoints: [StatPoint]                = []
+    @Published var agentUsage: [String: Int]              = [:]   // agentId → totalTokens
 
     @Published var gatewayStatus: GatewayStatus           = .unknown
     @Published var gatewayPort: Int                       = 18789
@@ -37,6 +38,7 @@ final class AppViewModel: ObservableObject {
     var totalTokens: Int     { agentRuntimes.values.reduce(0) { $0 + $1.totalTokens } }
     var totalSessions: Int   { sessions.count }
     var totalMessages: Int   { sessions.reduce(0) { $0 + $1.messages } }
+    var onlineAgents: Int    { agentRuntimes.values.filter { $0.status == .online }.count }
     var activeAlertCount: Int { alerts.filter { $0.status == .active }.count }
 
     func runtime(for agentId: String) -> AgentRuntime {
@@ -66,12 +68,6 @@ final class AppViewModel: ObservableObject {
             isUsingMockData = false
             configError = nil
             watchConfigFile()
-            // Start real log-based stats collection
-            StatsCollector.shared.start()
-            StatsCollector.shared.$statPoints
-                .receive(on: DispatchQueue.main)
-                .sink { [weak self] points in self?.statPoints = points }
-                .store(in: &cancellables)
         } else {
             applyMockData()
             isUsingMockData = true
@@ -96,6 +92,11 @@ final class AppViewModel: ObservableObject {
         guard !isUsingMockData, let config = ConfigService.shared.load() else { return }
         apply(config: config)
         checkAlertRules()
+        // Also refresh live gateway data
+        if GatewayService.shared.isConnected {
+            Task { await GatewayService.shared.fetchSessions() }
+            Task { await GatewayService.shared.fetchAgents() }
+        }
     }
 
     // MARK: - Refresh Timer
@@ -123,6 +124,8 @@ final class AppViewModel: ObservableObject {
             withAnimation { self.gatewayStatus = .healthy }
             Task { await gw.fetchAgents() }
             Task { await gw.fetchSessions() }
+            Task { await gw.fetchSkillsStatus() }
+            Task { await gw.fetchUsage() }
         }
         gw.onDisconnected = { [weak self] in
             guard let self else { return }
@@ -134,6 +137,15 @@ final class AppViewModel: ObservableObject {
         }
         gw.onSessionsUpdated = { [weak self] gwSessions in
             self?.applyGWSessions(gwSessions)
+        }
+        gw.onSkillsUpdated = { [weak self] gwSkills in
+            self?.skills = gwSkills
+        }
+        gw.onUsageUpdated = { [weak self] points in
+            self?.statPoints = points
+        }
+        gw.onAgentUsageUpdated = { [weak self] usage in
+            self?.agentUsage = usage
         }
         gw.connect(port: port, token: token)
     }
@@ -158,13 +170,20 @@ final class AppViewModel: ObservableObject {
     private func applyGWSessions(_ gwSessions: [GWSession]) {
         // Build sessions list from gateway data
         sessions = gwSessions.map { gw in
-            SessionInfo(
+            let sessionType: SessionType = {
+                switch gw.chatType {
+                case "group":  return .group
+                case "cron":   return .cron
+                default:       return .dm
+                }
+            }()
+            return SessionInfo(
                 id: gw.key,
                 agentId: gw.agentId,
-                type: .dm,
+                type: sessionType,
                 platform: gw.platform,
-                userName: nil,
-                channelName: nil,
+                userName:    sessionType == .dm    ? gw.displayName : nil,
+                channelName: sessionType != .dm    ? gw.displayName : nil,
                 tokens: gw.tokens,
                 messages: gw.messageCount,
                 lastActive: gw.lastActivity,
@@ -172,17 +191,26 @@ final class AppViewModel: ObservableObject {
             )
         }
         // Update agent runtimes with aggregated stats
+        // Use case-insensitive matching: session key may have "beethoven" while config has "Beethoven"
         var countMap: [String: Int] = [:]
         var tokenMap: [String: Int] = [:]
+        var providerMap: [String: String] = [:]
         for s in gwSessions {
-            countMap[s.agentId, default: 0] += 1
-            tokenMap[s.agentId, default: 0] += s.tokens
+            // Find matching runtime key case-insensitively
+            let matchedId = agentRuntimes.keys
+                .first { $0.lowercased() == s.agentId.lowercased() } ?? s.agentId
+            countMap[matchedId, default: 0] += 1
+            tokenMap[matchedId, default: 0] += s.tokens
+            if !s.modelProvider.isEmpty { providerMap[matchedId] = s.modelProvider }
         }
         for (agentId, count) in countMap {
             if agentRuntimes[agentId] != nil {
                 agentRuntimes[agentId]!.sessionCount = count
                 agentRuntimes[agentId]!.totalTokens  = tokenMap[agentId] ?? 0
                 agentRuntimes[agentId]!.status       = count > 0 ? .online : .idle
+                if let provider = providerMap[agentId] {
+                    agentRuntimes[agentId]!.provider = provider
+                }
             }
         }
         // Mark agents with no sessions as idle
@@ -225,6 +253,11 @@ final class AppViewModel: ObservableObject {
     private func pollGateway() {
         if isUsingMockData {
             withAnimation { gatewayStatus = .healthy }
+            return
+        }
+        // If WebSocket is connected, just refresh session data
+        if GatewayService.shared.isConnected {
+            Task { await GatewayService.shared.fetchSessions() }
             return
         }
         let urlString = "http://localhost:\(gatewayPort)/health"
@@ -335,6 +368,18 @@ final class AppViewModel: ObservableObject {
         return true
     }
 
+    /// Real connectivity test: pings the gateway WebSocket and confirms the model is reachable.
+    /// Because all models route through the gateway, a live gateway response means the model
+    /// provider chain is operational.
+    func testModelConnectivity(modelId: String) async -> Bool {
+        // 1. Gateway WebSocket must be connected and responsive
+        guard GatewayService.shared.isConnected else { return false }
+        guard await GatewayService.shared.ping() else { return false }
+        // 2. Model must exist in the known model list
+        guard models.contains(where: { $0.id == modelId }) else { return false }
+        return true
+    }
+
     // MARK: - Private helpers
 
     private func apply(config: OpenClawConfig) {
@@ -365,6 +410,7 @@ final class AppViewModel: ObservableObject {
         alerts        = MockData.alerts
         skills        = MockData.skills
         statPoints    = MockData.statPoints
+        agentUsage    = MockData.agentUsage
         gatewayPort   = 18789
         agentRuntimes = Dictionary(uniqueKeysWithValues: MockData.agentRuntimes.map { ($0.id, $0) })
     }

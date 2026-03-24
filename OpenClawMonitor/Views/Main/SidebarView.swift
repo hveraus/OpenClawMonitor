@@ -7,6 +7,7 @@ enum SidebarItem: String, CaseIterable, Identifiable {
     case statistics  = "Statistics"
     case skills      = "Skills"
     case alerts      = "Alerts"
+    case cronJobs    = "Cron Jobs"
     case pixelOffice = "Pixel Office"
 
     var id: String { rawValue }
@@ -19,6 +20,7 @@ enum SidebarItem: String, CaseIterable, Identifiable {
         case .statistics:  return "chart.bar.xaxis"
         case .skills:      return "bolt.fill"
         case .alerts:      return "bell.badge"
+        case .cronJobs:    return "clock.badge"
         case .pixelOffice: return "gamecontroller"
         }
     }

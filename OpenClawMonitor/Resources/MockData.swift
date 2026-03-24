@@ -107,11 +107,23 @@ enum MockData {
             (72_400, 234, 1680),
             (58_200, 191, 1520),
         ]
+        let modelKeys = ["k2p5", "claude-opus-4-6", "gpt-5.3-codex"]
         return seed.enumerated().map { idx, s in
             let date = cal.date(byAdding: .day, value: -(13 - idx), to: .now)!
-            return StatPoint(date: date, tokens: s.tokens, messages: s.messages, avgResponseMs: s.ms)
+            let m0 = Int(Double(s.tokens) * 0.72)
+            let m1 = Int(Double(s.tokens) * 0.22)
+            let m2 = s.tokens - m0 - m1
+            let byModel: [String: Int] = [modelKeys[0]: m0, modelKeys[1]: m1, modelKeys[2]: m2]
+            return StatPoint(date: date, tokens: s.tokens, messages: s.messages,
+                             avgResponseMs: s.ms, byModel: byModel)
         }
     }()
+
+    static let agentUsage: [String: Int] = [
+        "beethoven": 3_200_000,
+        "karajan":   1_800_000,
+        "main":      12_500_000,
+    ]
 
     // MARK: - Alerts
 
@@ -144,6 +156,65 @@ enum MockData {
         SkillInfo(id: "daily-report",  name: "Daily Reporter",   description: "每日定时生成团队周报并推送至飞书群",                type: .custom,   isEnabled: true,  version: "2.0.1", author: "Local"),
         SkillInfo(id: "sentry-alert",  name: "Sentry Watcher",   description: "监听 Sentry 错误并在 Discord 发送告警",           type: .custom,   isEnabled: false, version: "0.5.0", author: "Local"),
     ]
+
+    // MARK: - Cron Jobs
+
+    static let cronJobs: [CronJob] = {
+        let cal = Calendar.current
+        func hoursAgo(_ h: Int) -> Double {
+            cal.date(byAdding: .hour, value: -h, to: .now)!.timeIntervalSince1970 * 1000
+        }
+        return [
+            CronJob(
+                id: "daily-brief",
+                name: "每日简报",
+                schedule: CronSchedule(type: "cron", expression: "0 9 * * 1-5",
+                                       interval: nil, at: nil, tz: "Asia/Shanghai"),
+                enabled: true,
+                lastRun: CronLastRun(timestamp: hoursAgo(3), status: "ok", error: nil),
+                sessionTarget: "main",
+                model: nil,
+                delivery: CronDelivery(channel: "feishu", to: "@team-channel"),
+                agentId: "aria"
+            ),
+            CronJob(
+                id: "weekly-report",
+                name: "周报汇总",
+                schedule: CronSchedule(type: "cron", expression: "0 18 * * 5",
+                                       interval: nil, at: nil, tz: "Asia/Shanghai"),
+                enabled: true,
+                lastRun: CronLastRun(timestamp: hoursAgo(168), status: "ok", error: nil),
+                sessionTarget: "isolated",
+                model: "claude-opus-4-5",
+                delivery: CronDelivery(channel: "telegram", to: "@weekly-digest"),
+                agentId: "echo"
+            ),
+            CronJob(
+                id: "server-check",
+                name: "服务器健康检查",
+                schedule: CronSchedule(type: "every", expression: nil,
+                                       interval: 1_800_000, at: nil, tz: nil),
+                enabled: true,
+                lastRun: CronLastRun(timestamp: hoursAgo(0), status: "ok", error: nil),
+                sessionTarget: "isolated",
+                model: nil,
+                delivery: CronDelivery(channel: "discord", to: "#alerts"),
+                agentId: "bolt"
+            ),
+            CronJob(
+                id: "one-time-reminder",
+                name: "季度复盘提醒",
+                schedule: CronSchedule(type: "at", expression: nil,
+                                       interval: nil, at: "2026-03-31T10:00:00+08:00", tz: "Asia/Shanghai"),
+                enabled: false,
+                lastRun: nil,
+                sessionTarget: "main",
+                model: nil,
+                delivery: CronDelivery(channel: "feishu", to: "@me"),
+                agentId: "sage"
+            ),
+        ]
+    }()
 
     // MARK: - Synthetic OpenClawConfig (for ConfigService fallback)
 
