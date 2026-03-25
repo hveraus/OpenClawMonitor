@@ -46,13 +46,13 @@ final class LiteLLMService: ObservableObject {
     private let refreshInterval: TimeInterval = 24 * 60 * 60
     private var refreshTask: Task<Void, Never>?
 
-    private var cacheURL: URL {
+    private lazy var cacheURL: URL = {
         let support = FileManager.default
             .urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
             .appendingPathComponent("OpenClawMonitor")
         try? FileManager.default.createDirectory(at: support, withIntermediateDirectories: true)
         return support.appendingPathComponent("litellm-cache.json")
-    }
+    }()
 
     // MARK: - Public API
 
