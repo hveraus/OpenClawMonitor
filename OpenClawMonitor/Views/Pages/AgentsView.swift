@@ -9,6 +9,18 @@ struct AgentsView: View {
 
     private let columns = [GridItem(.adaptive(minimum: 300, maximum: 420), spacing: 16)]
 
+    // Computed once per render pass; avoids calling agentTokens 2× per agent.
+    private var tokenCounts: [String: Int] {
+        Dictionary(uniqueKeysWithValues: viewModel.agents.map { agent in
+            (agent.id, viewModel.agentTokens(
+                for: agent.id,
+                period: tokenPeriod,
+                customStart: customStart,
+                customEnd: customEnd
+            ))
+        })
+    }
+
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
@@ -46,9 +58,10 @@ struct AgentsView: View {
                 .animation(.easeInOut(duration: 0.2), value: tokenPeriod)
 
                 // ── Top stats strip ────────────────────────────────────────
+                let counts = tokenCounts
                 HStack(spacing: 12) {
                     StatCard(icon: "circle.hexagongrid.fill",
-                             value: formatTokens(totalFilteredTokens),
+                             value: formatTokens(counts.values.reduce(0, +)),
                              label: "总 Token 用量")
                     StatCard(icon: "bubble.left.and.text.bubble.right",
                              value: "\(viewModel.totalSessions)",
@@ -65,12 +78,7 @@ struct AgentsView: View {
                         AgentCard(
                             agent: agent,
                             runtime: viewModel.runtime(for: agent.id),
-                            tokenCount: viewModel.agentTokens(
-                                for: agent.id,
-                                period: tokenPeriod,
-                                customStart: customStart,
-                                customEnd: customEnd
-                            ),
+                            tokenCount: counts[agent.id] ?? 0,
                             isMockMode: viewModel.isUsingMockData
                         )
                         .transition(.opacity.combined(with: .scale(scale: 0.95)))
@@ -82,19 +90,6 @@ struct AgentsView: View {
             .padding(.vertical, 20)
         }
         .background(Color(.windowBackgroundColor))
-    }
-
-    // MARK: - Helpers
-
-    private var totalFilteredTokens: Int {
-        viewModel.agents.reduce(0) { sum, agent in
-            sum + viewModel.agentTokens(
-                for: agent.id,
-                period: tokenPeriod,
-                customStart: customStart,
-                customEnd: customEnd
-            )
-        }
     }
 
     private func formatTokens(_ n: Int) -> String {

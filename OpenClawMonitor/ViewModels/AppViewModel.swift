@@ -59,6 +59,8 @@ final class AppViewModel: ObservableObject {
     private var refreshTimer: Timer?
     private var gatewayTimer: Timer?
     private var cancellables = Set<AnyCancellable>()
+    private var lastSessionScanDate: Date?
+    private let sessionScanMinInterval: TimeInterval = 60   // at most once per minute
 
     func loadData() {
         // Request notification permission up-front
@@ -246,7 +248,15 @@ final class AppViewModel: ObservableObject {
 
     /// Scans ~/.openclaw/agents/{id}/sessions/*.jsonl to compute avg response time per agent.
     /// Pairs consecutive user→assistant messages; averages their timestamp deltas.
+    /// Shared date formatter for "yyyy-MM-dd" used in session scanning and token filtering.
+    private static let sessionDayFormatter: DateFormatter = {
+        let df = DateFormatter(); df.dateFormat = "yyyy-MM-dd"; df.timeZone = .current; return df
+    }()
+
     func scanAgentSessionFiles() {
+        let now = Date()
+        if let last = lastSessionScanDate, now.timeIntervalSince(last) < sessionScanMinInterval { return }
+        lastSessionScanDate = now
         let agentIds = Array(agentRuntimes.keys)
         guard !agentIds.isEmpty else { return }
         Task.detached(priority: .utility) { [agentIds] in
@@ -258,9 +268,7 @@ final class AppViewModel: ObservableObject {
 
             let iso = ISO8601DateFormatter()
             iso.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
-            let dayFmt: DateFormatter = {
-                let df = DateFormatter(); df.dateFormat = "yyyy-MM-dd"; df.timeZone = .current; return df
-            }()
+            let dayFmt = AppViewModel.sessionDayFormatter
 
             // agentId → dateStr → tokens
             var dailyTokenResults: [String: [String: Int]] = [:]
@@ -341,25 +349,21 @@ final class AppViewModel: ObservableObject {
                 if !dailyMap.isEmpty { dailyTokenResults[agentId] = dailyMap }
             }
 
-            let finalAvg      = avgResults
-            let finalProvider = providerResults
-            let finalModel    = modelResults
-            let finalDaily    = dailyTokenResults
             await MainActor.run {
                 for agentId in agentIds {
                     guard self.agentRuntimes[agentId] != nil else { continue }
-                    if let avgMs = finalAvg[agentId] {
+                    if let avgMs = avgResults[agentId] {
                         self.agentRuntimes[agentId]!.avgResponseMs = avgMs
                     }
-                    if let p = finalProvider[agentId] {
+                    if let p = providerResults[agentId] {
                         self.agentRuntimes[agentId]!.provider = p
                     }
                     if self.agentRuntimes[agentId]!.lastModel == nil,
-                       let m = finalModel[agentId] {
+                       let m = modelResults[agentId] {
                         self.agentRuntimes[agentId]!.lastModel = m
                     }
                 }
-                self.agentDailyTokens = finalDaily
+                self.agentDailyTokens = dailyTokenResults
             }
         }
     }
@@ -376,18 +380,18 @@ final class AppViewModel: ObservableObject {
             return agentUsage[agentId] ?? 0
         }
         guard let daily = agentDailyTokens[agentId] else { return 0 }
-        let cal  = Calendar.current
-        let now  = Date()
-        let df   = DateFormatter(); df.dateFormat = "yyyy-MM-dd"; df.timeZone = .current
+        let cal = Calendar.current
+        let now = Date()
+        let df  = Self.sessionDayFormatter
         return daily.reduce(0) { sum, pair in
             guard let date = df.date(from: pair.key) else { return sum }
             let include: Bool
             switch period {
-            case .all:       include = true
             case .thisYear:  include = cal.isDate(date, equalTo: now, toGranularity: .year)
             case .thisMonth: include = cal.isDate(date, equalTo: now, toGranularity: .month)
             case .thisWeek:  include = cal.isDate(date, equalTo: now, toGranularity: .weekOfYear)
             case .custom:    include = date >= customStart && date <= customEnd
+            case .all:       include = true  // unreachable; handled by early return above
             }
             return include ? sum + pair.value : sum
         }
