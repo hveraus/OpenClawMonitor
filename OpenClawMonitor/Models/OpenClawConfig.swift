@@ -236,7 +236,8 @@ struct AgentRuntime: Identifiable {
     var sessionCount: Int
     var totalTokens: Int
     var avgResponseMs: Int
-    var provider: String = ""  // populated from gateway session data
+    var provider: String = ""   // populated from gateway session data
+    var lastModel: String? = nil // last-used model name from most-recent session
 
     enum AgentStatus: String {
         case online, idle, offline

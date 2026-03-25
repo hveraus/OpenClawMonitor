@@ -151,6 +151,63 @@ struct ModelPriceReference {
         "qwen-turbo":        "qwen-plus",
     ]
 
+    // MARK: - Provider map  (model-id prefix → display provider name)
+
+    private static let providerMap: [(prefix: String, provider: String)] = [
+        ("claude-",         "Anthropic"),
+        ("gpt-",            "OpenAI"),
+        ("o1",              "OpenAI"),
+        ("o3",              "OpenAI"),
+        ("o4",              "OpenAI"),
+        ("gemini-",         "Google"),
+        ("deepseek-",       "DeepSeek"),
+        ("kimi-",           "Moonshot / Kimi"),
+        ("moonshot-",       "Moonshot / Kimi"),
+        ("qwen",            "Alibaba Qwen"),
+        ("glm-",            "Zhipu"),
+        ("minimax-",        "MiniMax"),
+        ("doubao-",         "ByteDance"),
+        ("grok-",           "xAI"),
+        ("mistral-",        "Mistral"),
+        ("mimo-",           "Xiaomi MiMo"),
+    ]
+
+    static func provider(for modelId: String) -> String {
+        let id = modelId.lowercased()
+        for (prefix, name) in providerMap where id.hasPrefix(prefix) { return name }
+        return "Other"
+    }
+
+    // MARK: - All entries (for the All Models view)
+
+    struct ModelEntry: Identifiable {
+        let id: String          // model id
+        let provider: String
+        let price: Price
+    }
+
+    /// All known models sorted by provider then model id.
+    static var allEntries: [ModelEntry] {
+        table.map { id, price in
+            ModelEntry(id: id, provider: provider(for: id), price: price)
+        }
+        .sorted {
+            if $0.provider != $1.provider { return $0.provider < $1.provider }
+            return $0.id < $1.id
+        }
+    }
+
+    /// Entries grouped by provider, order matching providerMap.
+    static var entriesByProvider: [(provider: String, models: [ModelEntry])] {
+        let dict = Dictionary(grouping: allEntries, by: \.provider)
+        // Sort providers in providerMap order, then alphabetically for unknowns
+        let ordered = providerMap.map(\.provider) + ["Other"]
+        return ordered.compactMap { p in
+            guard let models = dict[p], !models.isEmpty else { return nil }
+            return (provider: p, models: models.sorted { $0.id < $1.id })
+        }
+    }
+
     // MARK: - Lookup
     static func lookup(_ modelId: String) -> Price? {
         let id = modelId.lowercased()

@@ -31,8 +31,10 @@ struct GWSession {
     let platform: String
     let lastActivity: Date
     let modelProvider: String
+    let modelId: String?       // last-used model name (e.g. "claude-opus-4-6")
     let displayName: String?   // cleaned user/channel name
     let chatType: String       // "direct" | "group" | "cron"
+    let lastActivityMs: Double // raw updatedAt timestamp for recency sorting
 }
 
 // MARK: - GatewayService
@@ -276,7 +278,9 @@ final class GatewayService: NSObject {
         var modelMap: [String: [String: Int]] = [:]
         for item in modelDaily {
             guard let dateStr = item["date"] as? String,
-                  let model   = item["model"] as? String else { continue }
+                  let model   = item["model"] as? String,
+                  !StatsCollector.excludedModelPrefixes.contains(where: { model.lowercased().contains($0) })
+            else { continue }
             let tokens = item["tokens"] as? Int ?? 0
             modelMap[dateStr, default: [:]][model, default: 0] += tokens
         }
@@ -431,6 +435,7 @@ final class GatewayService: NSObject {
             let lastAct   = updatedMs > 0 ? Date(timeIntervalSince1970: updatedMs / 1000) : Date()
             let status    = (item["abortedLastRun"] as? Int ?? 0) > 0 ? "idle" : "active"
             let modelProvider = item["modelProvider"] as? String ?? ""
+            let modelId   = item["modelId"] as? String ?? item["model"] as? String
             let chatType  = item["chatType"] as? String ?? item["kind"] as? String ?? "direct"
             // "Ken Shi id:8639178504" → "Ken Shi"
             let rawName   = item["displayName"] as? String
@@ -440,7 +445,9 @@ final class GatewayService: NSObject {
                              tokens: tokens, messageCount: 0,
                              platform: platform, lastActivity: lastAct,
                              modelProvider: modelProvider,
-                             displayName: cleanName, chatType: chatType)
+                             modelId: modelId,
+                             displayName: cleanName, chatType: chatType,
+                             lastActivityMs: updatedMs)
         }
         onSessionsUpdated?(sessions)
     }

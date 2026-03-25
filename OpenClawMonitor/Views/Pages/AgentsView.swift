@@ -3,16 +3,52 @@ import SwiftUI
 struct AgentsView: View {
     @EnvironmentObject var viewModel: AppViewModel
 
+    @State private var tokenPeriod: TokenPeriod = .all
+    @State private var customStart: Date = Calendar.current.date(byAdding: .month, value: -1, to: Date()) ?? Date()
+    @State private var customEnd:   Date = Date()
+
     private let columns = [GridItem(.adaptive(minimum: 300, maximum: 420), spacing: 16)]
 
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
 
-                // ── Top stats strip (§3.3.1) ───────────────────────────────
+                // ── Period selector ────────────────────────────────────────
+                VStack(alignment: .leading, spacing: 8) {
+                    HStack(spacing: 8) {
+                        Text("时间段:")
+                            .font(.subheadline).foregroundStyle(.secondary)
+                        Picker("时间段", selection: $tokenPeriod) {
+                            ForEach(TokenPeriod.allCases, id: \.self) { p in
+                                Text(p.rawValue).tag(p)
+                            }
+                        }
+                        .pickerStyle(.segmented)
+                        .frame(maxWidth: 380)
+                    }
+
+                    if tokenPeriod == .custom {
+                        HStack(spacing: 12) {
+                            DatePicker("开始", selection: $customStart,
+                                       in: ...customEnd, displayedComponents: .date)
+                                .datePickerStyle(.compact)
+                                .labelsHidden()
+                            Text("—").foregroundStyle(.secondary)
+                            DatePicker("结束", selection: $customEnd,
+                                       in: customStart..., displayedComponents: .date)
+                                .datePickerStyle(.compact)
+                                .labelsHidden()
+                        }
+                        .transition(.opacity.combined(with: .move(edge: .top)))
+                    }
+                }
+                .padding(.horizontal, 20)
+                .animation(.easeInOut(duration: 0.2), value: tokenPeriod)
+
+                // ── Top stats strip ────────────────────────────────────────
                 HStack(spacing: 12) {
                     StatCard(icon: "circle.hexagongrid.fill",
-                             value: formatTokens(viewModel.totalTokens),
+                             value: formatTokens(totalFilteredTokens),
                              label: "总 Token 用量")
                     StatCard(icon: "bubble.left.and.text.bubble.right",
                              value: "\(viewModel.totalSessions)",
@@ -23,12 +59,18 @@ struct AgentsView: View {
                 }
                 .padding(.horizontal, 20)
 
-                // ── Agent cards (§3.3.2) ───────────────────────────────────
+                // ── Agent cards ────────────────────────────────────────────
                 LazyVGrid(columns: columns, spacing: 16) {
                     ForEach(viewModel.agents) { agent in
                         AgentCard(
                             agent: agent,
                             runtime: viewModel.runtime(for: agent.id),
+                            tokenCount: viewModel.agentTokens(
+                                for: agent.id,
+                                period: tokenPeriod,
+                                customStart: customStart,
+                                customEnd: customEnd
+                            ),
                             isMockMode: viewModel.isUsingMockData
                         )
                         .transition(.opacity.combined(with: .scale(scale: 0.95)))
@@ -40,6 +82,19 @@ struct AgentsView: View {
             .padding(.vertical, 20)
         }
         .background(Color(.windowBackgroundColor))
+    }
+
+    // MARK: - Helpers
+
+    private var totalFilteredTokens: Int {
+        viewModel.agents.reduce(0) { sum, agent in
+            sum + viewModel.agentTokens(
+                for: agent.id,
+                period: tokenPeriod,
+                customStart: customStart,
+                customEnd: customEnd
+            )
+        }
     }
 
     private func formatTokens(_ n: Int) -> String {
