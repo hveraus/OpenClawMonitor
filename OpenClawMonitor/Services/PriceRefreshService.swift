@@ -74,13 +74,13 @@ final class PriceRefreshService: ObservableObject {
 
     // MARK: - Cache URL
 
-    private var cacheURL: URL {
+    private lazy var cacheURL: URL = {
         let support = FileManager.default
             .urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
             .appendingPathComponent("OpenClawMonitor")
         try? FileManager.default.createDirectory(at: support, withIntermediateDirectories: true)
         return support.appendingPathComponent("price-cache.json")
-    }
+    }()
 
     private let apiURL = URL(string: "https://yunwu.ai/api/pricing_new")!
     private let refreshInterval: TimeInterval = 24 * 60 * 60   // 24 h
