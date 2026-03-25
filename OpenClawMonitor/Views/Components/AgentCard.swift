@@ -3,10 +3,10 @@ import SwiftUI
 struct AgentCard: View {
     let agent: AgentConfig
     let runtime: AgentRuntime
+    let tokenCount: Int
     let isMockMode: Bool
 
-    @State private var isHovered  = false
-    @State private var testState: TestState = .idle
+    @State private var isHovered = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -14,18 +14,18 @@ struct AgentCard: View {
             // ── Header ─────────────────────────────────────────────────────
             HStack(spacing: 10) {
                 Text(agent.displayEmoji)
-                    .font(.title)
+                    .font(.largeTitle)
                 VStack(alignment: .leading, spacing: 2) {
                     Text(agent.displayName)
-                        .font(.headline).fontWeight(.semibold)
-                    Text(agent.model ?? "未配置模型")
-                        .font(.caption).foregroundStyle(.secondary)
+                        .font(.title3).fontWeight(.semibold)
+                    Text(displayModel)
+                        .font(.footnote).foregroundStyle(.secondary)
                 }
                 Spacer()
                 VStack(alignment: .trailing, spacing: 4) {
                     StatusDot(status: runtime.status.dotStatus, size: 9)
                     Text(runtime.status.label)
-                        .font(.caption2).foregroundStyle(.secondary)
+                        .font(.caption).foregroundStyle(.secondary)
                 }
             }
 
@@ -41,14 +41,9 @@ struct AgentCard: View {
             // ── Stats grid ──────────────────────────────────────────────────
             LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 8) {
                 AgentStat(label: "会话数",   value: "\(runtime.sessionCount)")
-                AgentStat(label: "Token",   value: tokenLabel(runtime.totalTokens))
-                AgentStat(label: "平均响应", value: "\(runtime.avgResponseMs) ms")
-                AgentStat(label: "Provider", value: runtime.provider.isEmpty ? providerName(agent.model) : runtime.provider)
-            }
-
-            // ── Connectivity test ───────────────────────────────────────────
-            ConnectivityTestButton(state: $testState) {
-                await runTest()
+                AgentStat(label: "Token",   value: tokenLabel(tokenCount))
+                AgentStat(label: "平均响应", value: avgResponseLabel)
+                AgentStat(label: "Provider", value: providerName(displayModel, hint: runtime.provider))
             }
         }
         .padding(16)
@@ -62,30 +57,13 @@ struct AgentCard: View {
 
     // MARK: - Private
 
-    private func runTest() async {
-        testState = .testing
-        let ok: Bool
-        if isMockMode {
-            ok = await fakeTest()
-        } else {
-            ok = await realTest()
-        }
-        withAnimation { testState = ok ? .success : .failure }
-        try? await Task.sleep(for: .seconds(3))
-        withAnimation { testState = .idle }
+    /// Shows last-used model from live sessions; falls back to configured default.
+    private var displayModel: String {
+        runtime.lastModel ?? agent.model ?? "未配置模型"
     }
 
-    private func fakeTest() async -> Bool {
-        try? await Task.sleep(for: .seconds(1.5))
-        return true
-    }
-
-    private func realTest() async -> Bool {
-        guard let url = URL(string: "http://localhost:18789/health") else { return false }
-        var req = URLRequest(url: url, timeoutInterval: 5)
-        req.httpMethod = "GET"
-        return (try? await URLSession.shared.data(for: req))
-            .flatMap { _, res in (res as? HTTPURLResponse)?.statusCode == 200 } ?? false
+    private var avgResponseLabel: String {
+        runtime.avgResponseMs > 0 ? "\(runtime.avgResponseMs) ms" : "—"
     }
 
     private func tokenLabel(_ n: Int) -> String {
@@ -93,13 +71,36 @@ struct AgentCard: View {
                        : String(format: "%.1fk", Double(n)/1_000)
     }
 
-    private func providerName(_ model: String?) -> String {
-        guard let m = model?.lowercased() else { return "—" }
-        if m.contains("claude")    { return "Anthropic" }
-        if m.contains("gpt")       { return "OpenAI" }
-        if m.contains("deepseek")  { return "DeepSeek" }
-        if m.contains("gemini")    { return "Google" }
-        return "Unknown"
+    /// Derive a human-readable provider name from the model ID.
+    /// `hint` is the raw provider string from the session's model-snapshot
+    /// (e.g. "kimi", "yunwu-claude") used as fallback when the model name
+    /// alone is not enough to identify the vendor.
+    private func providerName(_ model: String, hint: String = "") -> String {
+        let m = model.lowercased()
+        if m.contains("claude")           { return "Anthropic" }
+        if m.contains("gpt") || m.hasPrefix("o1") || m.hasPrefix("o3") { return "OpenAI" }
+        if m.contains("gemini") || m.contains("vertex") { return "Google" }
+        if m.contains("deepseek")         { return "DeepSeek" }
+        if m.contains("kimi") || m.contains("moonshot") { return "Moonshot" }
+        if m.contains("qwen") || m.contains("dashscope") { return "Alibaba" }
+        if m.contains("glm") || m.contains("zhipu")     { return "Zhipu" }
+        if m.contains("mistral")          { return "Mistral" }
+        if m.contains("grok") || m.contains("xai")      { return "xAI" }
+        if m.contains("llama") || m.contains("meta")    { return "Meta" }
+
+        // Fall back to the session-level provider hint
+        let h = hint.lowercased()
+        if h.contains("kimi")       { return "Moonshot" }
+        if h.contains("moonshot")   { return "Moonshot" }
+        if h.contains("claude")     { return "Anthropic" }
+        if h.contains("openai")     { return "OpenAI" }
+        if h.contains("deepseek")   { return "DeepSeek" }
+        if h.contains("gemini") || h.contains("google") { return "Google" }
+        if h.contains("qwen") || h.contains("dashscope") { return "Alibaba" }
+        if h.contains("mistral")    { return "Mistral" }
+        if h.contains("grok")       { return "xAI" }
+        if !hint.isEmpty            { return hint }   // show raw if unknown
+        return "—"
     }
 }
 
@@ -112,9 +113,9 @@ private struct AgentStat: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 3) {
             Text(label)
-                .font(.caption2).foregroundStyle(.secondary)
+                .font(.caption).foregroundStyle(.secondary)
             Text(value)
-                .font(.title3).fontWeight(.semibold)
+                .font(.title2).fontWeight(.semibold)
                 .contentTransition(.numericText())
         }
         .frame(maxWidth: .infinity, alignment: .leading)

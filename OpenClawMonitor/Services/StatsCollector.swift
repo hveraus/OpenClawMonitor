@@ -19,6 +19,13 @@ final class StatsCollector: ObservableObject {
     private let logDir = URL(fileURLWithPath: "/tmp/openclaw")
     private var refreshTimer: Timer?
 
+    /// Model identifiers that are middleware/proxy services, not real LLMs.
+    /// Any model matching one of these prefixes/substrings is excluded from statistics.
+    static let excludedModelPrefixes: [String] = [
+        "deliver-mirror",
+        "delivery-mirror",
+    ]
+
     // MARK: - Internal cache model
 
     fileprivate struct DayStats: Codable {
@@ -129,7 +136,8 @@ final class StatsCollector: ObservableObject {
                 stats.totalResponseMs += ms
                 stats.responseCount   += 1
             }
-            if let model = entry.model, !model.isEmpty {
+            if let model = entry.model, !model.isEmpty,
+               !Self.excludedModelPrefixes.contains(where: { model.lowercased().contains($0) }) {
                 stats.byModel[model, default: 0] += total
             }
         }
